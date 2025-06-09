@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Budgeting Buddy - Dashboard</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <h1>Dashboard</h1>
+        <nav>
+            <a href="income.html" class="btn">Add Income</a>
+            <a href="expenses.html" class="btn">Add Expenses</a>
+            <a href="savings.html" class="btn">Savings Goals</a>
+            <a href="settings.html" class="btn">Settings</a>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main class="dashboard-main">
+        <section class="summary-cards">
+            <div class="card income-card">
+                <h2>Total Income</h2>
+                <p id="totalIncome">$0.00</p>
+            </div>
+            <div class="card expense-card">
+                <h2>Total Expenses</h2>
+                <p id="totalExpenses">$0.00</p>
+            </div>
+            <div class="card savings-card">
+                <h2>Savings Progress</h2>
+                <p id="savingsProgress">0%</p>
+            </div>
+        </section>
+
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>Spending by Category</h3>
+                <canvas id="expenseChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Income by Month</h3>
+                <canvas id="incomeChart"></canvas>
+            </div>
+        </section>
+
+        <section class="totals-section">
+            <p>Income: <span id="incomeTotal">Loading...</span></p>
+            <p>Expenses: <span id="expensesTotal">Loading...</span></p>
+            <p>Balance: <span id="balanceTotal">Loading...</span></p>
+        </section>          
+    </main>
+
+    <script type="module" src="../js/dashboard.js"></script>
+</body>
+
+</html>

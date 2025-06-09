@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Budgeting Buddy - Settings</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <h1>Settings</h1>
+        <nav>
+            <a href="dashboard.html" class="btn">Dashboard</a>
+            <a href="income.html" class="btn">Add Income</a>
+            <a href="expenses.html" class="btn">Add Expenses</a>
+            <a href="savings.html" class="btn">Savings Goals</a>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main class="settings-main">
+        <section class="settings-section">
+            <h2>Currency Preference</h2>
+            <select id="currencySelect" aria-label="Select preferred currency">
+                <!-- Options added dynamically -->
+            </select>
+        </section>
+
+        <section class="settings-section">
+            <h2>Manage Spending Categories</h2>
+            <form id="categoryForm">
+                <input type="text" id="categoryInput" placeholder="New category name" required />
+                <button type="submit" class="btn">Add Category</button>
+            </form>
+            <ul id="categoryList"></ul>
+        </section>
+    </main>
+
+    <script type="module" src="../js/settings.js"></script>
+</body>
+
+</html>

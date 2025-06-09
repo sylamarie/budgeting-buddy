@@ -1,0 +1,33 @@
+{
+    "users": [
+      {
+        "email": "test@example.com",
+        "password": "password123",
+        "name": "Test User"
+      }
+    ],
+    "incomeRecords": [
+      {
+        "email": "test@example.com",
+        "amount": 1000,
+        "category": "Salary",
+        "date": "2025-06-01"
+      }
+    ],
+    "expenseRecords": [
+      {
+        "email": "test@example.com",
+        "amount": 200,
+        "category": "Food",
+        "date": "2025-06-03"
+      }
+    ],
+    "savingsGoals": [
+      {
+        "email": "test@example.com",
+        "title": "Trip to Japan",
+        "targetAmount": 2000,
+        "savedAmount": 500
+      }
+    ]
+  }  

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Budgeting Buddy - Savings Goals</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <h1>Savings Goals</h1>
+        <a href="dashboard.html" class="btn">Back to Dashboard</a>
+    </header>
+
+    <main class="form-container">
+        <form id="savingsForm">
+            <label for="goalName">Goal Name</label>
+            <input type="text" id="goalName" name="goalName" placeholder="e.g. Trip to Japan" required minlength="3"
+                maxlength="50" />
+
+            <label for="goalAmount">Target Amount</label>
+            <input type="number" step="0.01" id="goalAmount" name="goalAmount" placeholder="e.g. 1000" required
+                min="1" />
+
+            <label for="savedSoFar">Amount Saved So Far</label>
+            <input type="number" step="0.01" id="savedSoFar" name="savedSoFar" placeholder="e.g. 200" required
+                min="0" />
+
+            <button type="submit">Add Goal</button>
+        </form>
+
+        <section class="savings-list-section">
+            <h2>Your Savings Goals</h2>
+            <ul id="savingsList" class="savings-list"></ul>
+        </section>
+    </main>
+
+    <script type="module" src="../js/savings.js"></script>
+</body>
+
+</html>

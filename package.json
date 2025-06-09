@@ -1,0 +1,17 @@
+{
+    "name": "budgeting-buddy",
+    "version": "1.0.0",
+    "description": "A simple budgeting app to track income, expenses, and savings goals.",
+    "main": "index.js",
+    "scripts": {
+        "lint": "eslint src/js/*.js",
+        "start": "live-server"
+    },
+    "author": "Your Name",
+    "license": "MIT",
+    "devDependencies": {
+        "eslint": "^8.0.0",
+        "live-server": "^1.2.2"
+    },
+    "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
+}
