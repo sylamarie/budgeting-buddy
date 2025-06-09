@@ -70,6 +70,16 @@ async function renderIncomeList(records) {
   });
 }
 
+  // ✅ Hamburger menu logic
+  const hamburger = document.getElementById("hamburger");
+  const navMenu = document.getElementById("navMenu");
+
+  if (hamburger && navMenu) {
+    hamburger.addEventListener("click", () => {
+      navMenu.classList.toggle("show");
+    });
+  }
+  
 // Get currency symbol (basic mapping)
 function getCurrencySymbol(currencyCode) {
   const symbols = {

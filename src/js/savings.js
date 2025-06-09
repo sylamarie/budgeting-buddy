@@ -83,6 +83,16 @@ function validateFormData(goalName, goalAmount, savedSoFar) {
   return true;
 }
 
+  // ✅ Hamburger menu logic
+  const hamburger = document.getElementById("hamburger");
+  const navMenu = document.getElementById("navMenu");
+
+  if (hamburger && navMenu) {
+    hamburger.addEventListener("click", () => {
+      navMenu.classList.toggle("show");
+    });
+  }
+
 function init() {
   const user = getCurrentUser();
   if (!user) {
