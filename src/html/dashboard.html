@@ -11,18 +11,30 @@
 </head>
 
 <body>
-    <header class="dashboard-header">
-        <h1>Dashboard</h1>
-        <nav>
-            <a href="income.html" class="btn">Add Income</a>
-            <a href="expenses.html" class="btn">Add Expenses</a>
-            <a href="savings.html" class="btn">Savings Goals</a>
-            <a href="settings.html" class="btn">Settings</a>
-            <button id="logoutBtn" class="btn logout-btn">Logout</button>
-        </nav>
-    </header>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="dashboard.html" class="logo">Budgeting Buddy</a>
+        </div>
+        <div class="hamburger" id="hamburger">&#9776;</div>
+        <div class="nav-right" id="navMenu">
+            <a href="income.html">Income</a>
+            <a href="expenses.html">Expenses</a>
+            <a href="savings.html">Savings</a>
+            <a href="settings.html">Settings</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </nav>
 
     <main class="dashboard-main">
+        <!-- Inspiring image and message inside dashboard-main -->
+        <section class="inspiration-banner">
+            <img src="/assets/images/personal-finances-savings.jpg" alt="Budget inspiration" />
+            <div class="inspiration-text">
+                <h2>Take Control of Your Money, One Budget at a Time</h2>
+                <p>Start today and build a brighter financial future.</p>
+            </div>
+        </section>
+
         <section class="summary-cards">
             <div class="card income-card">
                 <h2>Total Income</h2>
@@ -53,7 +65,7 @@
             <p>Income: <span id="incomeTotal">Loading...</span></p>
             <p>Expenses: <span id="expensesTotal">Loading...</span></p>
             <p>Balance: <span id="balanceTotal">Loading...</span></p>
-        </section>          
+        </section>
     </main>
 
     <script type="module" src="../js/dashboard.js"></script>

@@ -12,12 +12,10 @@
 
 import { preparePieChart, prepareBarChart } from './chart.js';
 import { convert } from './currency.js';
-import { updateTotalsDisplay } from './dashboard.js';
 
 const totalIncomeEl = document.getElementById('totalIncome');
 const totalExpensesEl = document.getElementById('totalExpenses');
 const savingsProgressEl = document.getElementById('savingsProgress');
-
 const logoutBtn = document.getElementById('logoutBtn');
 
 function getCurrentUser() {
@@ -61,7 +59,6 @@ function groupExpensesByCategory(expenses) {
 }
 
 function groupIncomeByMonth(incomes) {
-  // Group income by year-month string, sum amounts
   const groups = {};
   incomes.forEach(i => {
     const date = new Date(i.date);
@@ -95,28 +92,36 @@ function init() {
   totalExpensesEl.textContent = formatCurrency(totalExpenses);
   savingsProgressEl.textContent = `${savingsProgress.toFixed(0)}%`;
 
-  // Prepare data for expense pie chart
   const expenseGroups = groupExpensesByCategory(expenseRecords);
   const expenseLabels = Object.keys(expenseGroups);
   const expenseData = Object.values(expenseGroups);
-
   preparePieChart('expenseChart', expenseLabels, expenseData);
 
-  // Prepare data for income bar chart by month
   const incomeGroups = groupIncomeByMonth(incomeRecords);
   const incomeLabels = Object.keys(incomeGroups).sort();
   const incomeData = incomeLabels.map(label => incomeGroups[label]);
-
   prepareBarChart('incomeChart', incomeLabels, incomeData);
 
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
-  });
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    });
+  }
+
+  // ✅ Hamburger menu logic
+  const hamburger = document.getElementById("hamburger");
+  const navMenu = document.getElementById("navMenu");
+
+  if (hamburger && navMenu) {
+    hamburger.addEventListener("click", () => {
+      navMenu.classList.toggle("show");
+    });
+  }
 }
 
+// ✅ This must be defined outside init()
 async function updateTotalsDisplay(userData, userCurrency) {
-  // Assuming userData has incomeTotal and expensesTotal in USD
   try {
     const incomeInCurrency = await convert(userData.incomeTotal, 'USD', userCurrency);
     const expensesInCurrency = await convert(userData.expensesTotal, 'USD', userCurrency);
@@ -127,7 +132,6 @@ async function updateTotalsDisplay(userData, userCurrency) {
     document.getElementById('balanceTotal').textContent = `${userCurrency} ${balance.toFixed(2)}`;
   } catch (error) {
     console.error('Currency conversion error:', error);
-    // fallback: show in base currency
     document.getElementById('incomeTotal').textContent = `USD ${userData.incomeTotal.toFixed(2)}`;
     document.getElementById('expensesTotal').textContent = `USD ${userData.expensesTotal.toFixed(2)}`;
     document.getElementById('balanceTotal').textContent = `USD ${(userData.incomeTotal - userData.expensesTotal).toFixed(2)}`;
@@ -135,7 +139,7 @@ async function updateTotalsDisplay(userData, userCurrency) {
 }
 
 async function loadDashboard() {
-  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const user = getCurrentUser();
   if (!user) {
     window.location.href = 'login.html';
     return;
@@ -144,10 +148,9 @@ async function loadDashboard() {
   const settings = JSON.parse(localStorage.getItem('settings')) || {};
   const userSettings = settings[user.email] || { currency: 'USD' };
 
-  // Suppose you fetch or compute income and expense totals here
   const userData = {
-    incomeTotal: 1500,  // Example value
-    expensesTotal: 900, // Example value
+    incomeTotal: 1500,
+    expensesTotal: 900,
   };
 
   await updateTotalsDisplay(userData, userSettings.currency);

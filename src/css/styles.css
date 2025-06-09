@@ -12,7 +12,7 @@
 body {
     background-color: #A2D2FF;
     /* Light Sky Blue */
-    color: #222;
+    color: #333;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -34,8 +34,7 @@ body {
 .auth-container h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    color: #FFAFCC;
-    /* Pastel Pink */
+    color: black;
     margin-bottom: 1.5rem;
 }
 
@@ -80,12 +79,55 @@ body {
 }
 
 .auth-container a {
-    color: #FFAFCC;
+    color: black;
     text-decoration: none;
 }
 
 .auth-container a:hover {
     text-decoration: underline;
+}
+
+.home-container {
+  text-align: center;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 90%;
+}
+
+.home-container h1 {
+  font-size: 2.5rem;
+  color: #ff5e94;
+  margin-bottom: 1rem;
+}
+
+.home-container p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.home-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.home-buttons .btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #FFAFCC;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.home-buttons .btn:hover {
+  background-color: #FFC8DD;
 }
 
 /* Dashboard */
@@ -180,18 +222,28 @@ body {
 /* Forms */
 
 .form-container {
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 1rem 2rem;
+    max-width: 960px;
+    margin: 1.5rem auto;
     background: #FFC8DD;
     border-radius: 12px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    padding: 12rem;
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.form-inner-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .form-container form {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    width: 400px;
+    align-items: center;
 }
 
 .form-container label {
@@ -206,6 +258,7 @@ body {
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 1rem;
+    width: 100%;
 }
 
 .form-container button {
@@ -217,6 +270,7 @@ body {
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: fit-content;
 }
 
 .form-container button:hover {
@@ -233,25 +287,53 @@ body {
     overflow-y: auto;
     padding-left: 0;
     border-top: 2px solid #FFAFCC;
+    margin-top: 1rem;
 }
 
 .income-list li {
     display: flex;
     justify-content: space-between;
-    padding: 0.75rem 0;
+    align-items: center;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid #FFAFCC;
     font-weight: 600;
     color: #222;
+    gap: 1rem;
 }
 
-.income-list li span {
+.income-list li .info {
+    display: flex;
+    flex-direction: column;
     flex: 1;
 }
 
-.income-list li span.amount {
-    text-align: right;
+.income-list li .info span {
+    margin-bottom: 0.25rem;
+}
+
+.income-list li .amount {
     font-weight: 700;
     color: #0A74DA;
+}
+
+.income-list li .actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.income-list li button {
+    background-color: transparent;
+    border: none;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.income-list li button:hover {
+    background-color: #f0f0f0;
 }
 
 
@@ -347,85 +429,132 @@ body {
 
 
 /* Dashboard */
-.dashboard-header {
+.navbar {
+  position: fixed;      /* Fix it at top */
+  top: 0;
+  left: 0;
+  width: 100%;          /* Full width */
+  background-color: #FFC8DD;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10000;       /* High z-index so it’s above other content */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  flex-wrap: wrap;
+}
+
+.navbar .nav-left .logo {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.navbar .nav-right a {
+  color: #252525;
+  text-decoration: none;
+  margin-left: 1.5rem;
+  font-weight: 600;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.navbar .nav-right a:hover {
+  background-color: #9d6efb;
+}
+
+.nav-menu {
+    list-style: none;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background-color: #FFC8DD;
-    font-family: 'Poppins', sans-serif;
-    color: #222;
-    flex-wrap: wrap;
+    gap: 1rem; }
+
+#logoutBtn {
+  background-color: #cf6679;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
 }
 
-.dashboard-header nav a,
-.dashboard-header nav button {
-    margin-left: 1rem;
-    background-color: #FFAFCC;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    color: #222;
-    transition: background-color 0.3s ease;
-}
-
-.dashboard-header nav a:hover,
-.dashboard-header nav button:hover {
-    background-color: #FF91B8;
-}
-
-.logout-btn {
-    background-color: #FF4C4C;
-    color: white;
+#logoutBtn:hover {
+  background-color: #b94a5a;
 }
 
 .dashboard-main {
-    padding: 2rem;
-    font-family: 'Roboto', sans-serif;
-    max-width: 960px;
-    margin: 0 auto;
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 1rem;
+    padding-top: 70px;
 }
 
 .summary-cards {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .card {
-    background-color: #BDE0FE;
-    border-radius: 10px;
-    flex: 1;
-    min-width: 200px;
-    padding: 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    font-weight: 700;
-    color: #222;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  text-align: center;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.income-card {
+  border-top: 5px solid #4caf50;
+}
+.expense-card {
+  border-top: 5px solid #f44336;
+}
+.savings-card {
+  border-top: 5px solid #2196f3;
 }
 
 .charts-section {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
 }
 
 .chart-container {
-    flex: 1 1 400px;
-    background-color: #A2D2FF;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  flex: 1 1 460px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.chart-container h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Totals Section */
+.totals-section {
+  margin-top: 2rem;
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1.1rem;
 }
 
 
-.settings-main {
+/* .settings-main {
     max-width: 600px;
     margin: 2rem auto;
     padding: 0 1rem;
@@ -434,7 +563,7 @@ body {
 
 .settings-section {
     margin-bottom: 2rem;
-}
+} */
 
 #currencySelect {
     width: 100%;
@@ -481,20 +610,213 @@ body {
     cursor: pointer;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .summary-cards {
-        flex-direction: column;
-    }
+.inspiration-banner {
+    margin-top: 0;
+    /* Remove space above */
+    margin-bottom: 2rem;
+    /* Add space below */
+    position: relative;
+    text-align: center;
+}
 
-    .card {
-        flex: 1 1 100%;
-    }
+.inspiration-banner img {
+    width: 100%;
+    display: block;
+    margin: 0;
+    /* Remove image margin */
+    padding: 0;
+    /* Remove image padding */
+}
+
+.inspiration-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.6);
+    font-family: 'Poppins', sans-serif;
+}
+
+.inspiration-text h2 {
+    font-size: 2rem;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 0.5rem;
+    background-color: #a2d2ff85;
+}
+
+.inspiration-text p {
+    font-size: 1.1rem;
+    font-family: 'Roboto', sans-serif;
+    background-color: #a2d2ffd5;
+}
+
+.hamburger {
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 
 /* Responsive */
-@media (max-width: 480px) {
+/* Responsive: Tablets and smaller */
+@media (max-width: 992px) {
+
+    .dashboard-container,
+    .form-container,
+    .form-inner-wrapper,
+    .dashboard-main {
+        padding: 1rem;
+        width: 100%;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .chart-container {
+        flex: 1 1 100%;
+    }
+
+    .form-container form {
+        width: 100%;
+    }
+
+    .navbar .nav-right a {
+        margin-left: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .income-list li,
+    .expense-list li {
+        flex-direction: flex;
+        align-items: flex-start;
+    }
+
+    .income-list li span.amount,
+    .expense-list li span.amount {
+        text-align: left;
+        width: 100%;
+    }
+}
+
+/* Responsive: Mobile and smaller */
+@media (max-width: 600px) {
     .auth-container {
-        padding: 1.5rem 2rem;
+        padding: 1.25rem;
+        max-width: 100%;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .navbar .nav-right {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar .nav-right a {
+        margin: 0.3rem 0;
+        width: 100%;
+        text-align: left;
+    }
+
+    .form-container {
+        padding: 2rem 1rem;
+    }
+
+    .form-container form {
+        width: 100%;
+    }
+
+    .income-list li,
+    .expense-list li,
+    .savings-list li {
+        flex-direction: flex;
+        gap: 0.25rem;
+    }
+
+    .savings-list li h3 {
+        font-size: 1rem;
+    }
+
+    .quick-links {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .inspiration-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .inspiration-text p {
+        font-size: 0.95rem;
+    }
+
+    .totals-section {
+        font-size: 1rem;
+    }
+
+    .chart-container {
+        padding: 0.75rem;
+    }
+
+    .hamburger {
+    display: block;
+    }
+
+    .nav-right {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      background-color: #FFC8DD;
+      margin-top: 1rem;
+      padding: 1rem 0;
+      border-top: 1px solid #f0f0f0;
+    }
+  
+    .nav-right.show {
+      display: flex;
+    }
+  
+    .nav-right a {
+      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+
+    #navMenu {
+    display: none;
+    flex-direction: column;
+    background: #FFC8DD;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    padding: 1rem;
+    border-radius: 0 0 5px 5px;
+    border-radius: 10px;
+    }
+
+    #navMenu.show {
+    display: flex;
     }
 }

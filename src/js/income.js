@@ -46,11 +46,8 @@ async function renderIncomeList(records) {
     return;
   }
 
-  for (const r of records) {
-    // Convert USD amount to user's currency
+  for (const [index, r] of records.entries()) {
     const convertedAmount = await convert(r.amountUSD, 'USD', currentSettings.currency);
-
-    // Get currency symbol from currency module or fallback
     const currencySymbol = getCurrencySymbol(currentSettings.currency);
 
     const li = document.createElement('li');
@@ -58,9 +55,19 @@ async function renderIncomeList(records) {
       <span>${new Date(r.date).toLocaleDateString()}</span>
       <span>${r.category}</span>
       <span class="amount">${formatCurrency(convertedAmount, currencySymbol)}</span>
+      <button class="edit-btn" data-index="${index}">Edit</button>
+      <button class="delete-btn" data-index="${index}">Delete</button>
     `;
     incomeList.appendChild(li);
   }
+
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', handleEdit);
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', handleDelete);
+  });
 }
 
 // Get currency symbol (basic mapping)
@@ -83,7 +90,6 @@ function getCurrencySymbol(currencyCode) {
 // Reset form fields
 function resetForm() {
   incomeForm.reset();
-  // Reset date input to today
   incomeForm.incomeDate.value = new Date().toISOString().split('T')[0];
 }
 
@@ -104,6 +110,32 @@ function validateFormData(amount, category, date) {
   return true;
 }
 
+// Edit handler
+function handleEdit(event) {
+  const index = parseInt(event.target.dataset.index);
+  const records = loadIncomeRecords(currentUser.email);
+  const record = records[index];
+
+  convert(record.amountUSD, 'USD', currentSettings.currency).then(userAmount => {
+    incomeForm.incomeAmount.value = userAmount.toFixed(2);
+    incomeForm.incomeCategory.value = record.category;
+    incomeForm.incomeDate.value = record.date;
+
+    records.splice(index, 1);
+    localStorage.setItem('incomeRecords', JSON.stringify(records));
+    renderIncomeList(records);
+  });
+}
+
+// Delete handler
+function handleDelete(event) {
+  const index = parseInt(event.target.dataset.index);
+  const records = loadIncomeRecords(currentUser.email);
+  records.splice(index, 1);
+  localStorage.setItem('incomeRecords', JSON.stringify(records));
+  renderIncomeList(records);
+}
+
 async function init() {
   currentUser = getCurrentUser();
   if (!currentUser) {
@@ -113,17 +145,14 @@ async function init() {
 
   currentSettings = loadSettings(currentUser.email);
 
-  // Set max date to today for date input and default value
   const dateInput = incomeForm.incomeDate;
   const todayStr = new Date().toISOString().split('T')[0];
   dateInput.max = todayStr;
   dateInput.value = todayStr;
 
-  // Update amount label with currency code
   const amountLabel = incomeForm.querySelector('label[for="incomeAmount"]');
   amountLabel.textContent = `Amount (${currentSettings.currency})`;
 
-  // Load and render existing income records
   const records = loadIncomeRecords(currentUser.email);
   await renderIncomeList(records);
 
@@ -136,7 +165,6 @@ async function init() {
 
     if (!validateFormData(amountUserCurrency, category, date)) return;
 
-    // Convert entered amount to USD for consistent storage
     const amountUSD = await convert(amountUserCurrency, currentSettings.currency, 'USD');
 
     const newRecord = {
@@ -148,7 +176,6 @@ async function init() {
 
     saveIncomeRecord(newRecord);
 
-    // Update UI with new record
     const updatedRecords = loadIncomeRecords(currentUser.email);
     await renderIncomeList(updatedRecords);
 
