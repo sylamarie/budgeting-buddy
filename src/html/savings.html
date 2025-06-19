@@ -6,6 +6,8 @@
     <title>Savings Goals | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/dataManager.js"></script>
     <script src="../js/navbar.js"></script>
     <script defer src="../js/savings.js"></script>
 </head>
@@ -76,6 +78,66 @@
             </div>
         </div>
     </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+            <button id="close-profile-modal"
+                class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Name</label>
+                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Profile modal logic
+        const userInfoSection = document.getElementById('user-info');
+        if (userInfoSection) {
+            userInfoSection.style.cursor = 'pointer';
+            userInfoSection.addEventListener('click', (e) => {
+                if (e.target.classList.contains('logout-btn')) return;
+                if (
+                    e.target.id === 'user-info' ||
+                    e.target.id === 'user-name' ||
+                    e.target.id === 'user-initials' ||
+                    e.target.closest('#user-info')
+                ) {
+                    const modal = document.getElementById('profile-modal');
+                    if (modal) {
+                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                        const nameDiv = document.getElementById('profile-name');
+                        const emailDiv = document.getElementById('profile-email');
+                        if (nameDiv) nameDiv.textContent = userData.name || '';
+                        if (emailDiv) emailDiv.textContent = userData.email || '';
+                        modal.classList.remove('hidden');
+                    }
+                }
+            });
+            const logoutBtn = userInfoSection.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (window.auth && typeof window.auth.logout === 'function') {
+                        window.auth.logout();
+                    } else if (typeof auth !== 'undefined' && typeof auth.logout === 'function') {
+                        auth.logout();
+                    }
+                });
+            }
+        }
+        const closeBtn = document.getElementById('close-profile-modal');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                document.getElementById('profile-modal').classList.add('hidden');
+            };
+        }
+    </script>
 </body>
 
 </html>

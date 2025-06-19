@@ -154,11 +154,13 @@ class Auth {
     }
 
     logout() {
+        if (!confirm('Are you sure you want to log out?')) return;
         this.currentUser = null;
         this.isAuthenticated = false;
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
-        window.location.href = '/src/html/login.html';
+        // Optionally clear other user-specific data
+        window.location.href = '/index.html';
     }
 
     redirectToLogin() {
@@ -193,6 +195,12 @@ class Auth {
         authForms.forEach(element => {
             element.style.display = this.isAuthenticated ? 'none' : 'block';
         });
+
+        // Re-setup logout button listener after navbar reload
+        const logoutBtn = document.querySelector('.logout-btn');
+        if (logoutBtn) {
+            logoutBtn.onclick = () => this.logout();
+        }
     }
 
     showError(message) {

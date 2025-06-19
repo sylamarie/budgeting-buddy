@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         addExpense();
     });
+
+    populateCategoryDropdown();
 });
 
 function loadExpenseData() {
@@ -29,7 +31,7 @@ function loadExpenseData() {
 
 function updateTotalExpenses(expenses) {
     const total = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-    document.getElementById('total-expenses').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('total-expenses').textContent = `${getCurrencySymbol()}${formatAmount(total)}`;
 }
 
 function displayRecentExpenses(expenses) {
@@ -44,7 +46,7 @@ function displayRecentExpenses(expenses) {
     recentContainer.innerHTML = recentExpenses.map(expense => `
         <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
             <div>
-                <p class="font-medium text-gray-900">$${parseFloat(expense.amount).toFixed(2)}</p>
+                <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                 <p class="text-sm text-gray-600">${expense.category} • ${new Date(expense.date).toLocaleDateString()}</p>
             </div>
         </div>
@@ -64,10 +66,10 @@ function displayAllExpenses(expenses) {
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <span class="text-red-600 font-medium">$</span>
+                        <span class="text-red-600 font-medium">${getCurrencySymbol()}</span>
                     </div>
                     <div>
-                        <p class="font-medium text-gray-900">$${parseFloat(expense.amount).toFixed(2)}</p>
+                        <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                         <p class="text-sm text-gray-600">${expense.category}</p>
                     </div>
                 </div>
@@ -104,7 +106,7 @@ async function addExpense() {
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         loadExpenseData();
-        
+        populateCategoryDropdown();
         // Show success message
         showMessage('Expense added successfully!', 'success');
     } catch (error) {
@@ -117,6 +119,7 @@ async function deleteExpense(id) {
         const deleted = await dataManager.deleteExpense(id);
         if (deleted) {
             loadExpenseData();
+            populateCategoryDropdown();
             showMessage('Expense deleted successfully!', 'success');
         }
     } catch (error) {
@@ -145,6 +148,8 @@ function editExpense(id) {
 
     // Scroll to form
     document.getElementById('expense-form').scrollIntoView({ behavior: 'smooth' });
+
+    populateCategoryDropdown();
 }
 
 function updateExpense(id) {
@@ -172,6 +177,7 @@ function updateExpense(id) {
             };
 
             loadExpenseData();
+            populateCategoryDropdown();
             showMessage('Expense updated successfully!', 'success');
         }
     } catch (error) {
@@ -196,4 +202,39 @@ function showMessage(message, type) {
             messageDiv.parentNode.removeChild(messageDiv);
         }
     }, 3000);
+}
+
+function getCurrencySymbol() {
+    if (typeof dataManager !== 'undefined') {
+        const c = dataManager.getSetting('currency', 'USD');
+        const map = {USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', PHP: '₱', SGD: 'S$', CNY: '¥', KRW: '₩', INR: '₹'};
+        return map[c] || '$';
+    }
+    return '$';
+}
+
+window.addEventListener('currencyChanged', () => {
+  renderExpenses();
+});
+
+function populateCategoryDropdown() {
+    let categories = [];
+    if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
+        categories = dataManager.getSetting('categories', [
+            'Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Education', 'Other'
+        ]);
+    }
+    const categorySelect = document.getElementById('category');
+    if (!categorySelect) return;
+    categorySelect.innerHTML = '<option value="">Select category</option>';
+    categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+    });
+}
+
+function formatAmount(amount) {
+    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }

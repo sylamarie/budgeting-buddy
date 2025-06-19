@@ -31,6 +31,7 @@ function initializeNavbar() {
     
     // Update user profile information
     updateUserProfile();
+    setupProfileModal();
 }
 
 function updateActivePage() {
@@ -86,4 +87,49 @@ function updateUserProfile() {
         }
     }
 }
-  
+
+function setupProfileModal() {
+  const userInfoSection = document.getElementById('user-info');
+  if (userInfoSection) {
+    userInfoSection.style.cursor = 'pointer';
+    userInfoSection.addEventListener('click', (e) => {
+      // Only open modal if not clicking the logout button
+      if (e.target.classList.contains('logout-btn')) return;
+      // Open modal if clicking user-info, user-name, or user-initials
+      if (
+        e.target.id === 'user-info' ||
+        e.target.id === 'user-name' ||
+        e.target.id === 'user-initials' ||
+        e.target.closest('#user-info')
+      ) {
+        const modal = document.getElementById('profile-modal');
+        if (modal) {
+          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const nameDiv = document.getElementById('profile-name');
+          const emailDiv = document.getElementById('profile-email');
+          if (nameDiv) nameDiv.textContent = userData.name || '';
+          if (emailDiv) emailDiv.textContent = userData.email || '';
+          modal.classList.remove('hidden');
+        }
+      }
+    });
+    // Prevent logout button from triggering user-info click and ensure it logs out
+    const logoutBtn = userInfoSection.querySelector('.logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.auth && typeof window.auth.logout === 'function') {
+          window.auth.logout();
+        } else if (typeof auth !== 'undefined' && typeof auth.logout === 'function') {
+          auth.logout();
+        }
+      });
+    }
+  }
+  const closeBtn = document.getElementById('close-profile-modal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      document.getElementById('profile-modal').classList.add('hidden');
+    };
+  }
+}

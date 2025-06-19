@@ -6,6 +6,8 @@
     <title>Settings | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/dataManager.js"></script>
     <script src="../js/navbar.js"></script>
     <script defer src="../js/settings.js"></script>
 </head>
@@ -32,6 +34,11 @@
                     <option value="CAD">C$ Canadian Dollar</option>
                     <option value="AUD">A$ Australian Dollar</option>
                     <option value="JPY">¥ Japanese Yen</option>
+                    <option value="PHP">₱ Philippine Peso</option>
+                    <option value="SGD">S$ Singapore Dollar</option>
+                    <option value="CNY">¥ Chinese Yuan</option>
+                    <option value="KRW">₩ South Korean Won</option>
+                    <option value="INR">₹ Indian Rupee</option>
                 </select>
                 <div class="p-4 bg-blue-50 rounded">
                     <p class="text-sm text-blue-700">
@@ -89,9 +96,75 @@
                         Export your data for backup or import data from other budgeting apps.
                     </p>
                 </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Change Password</h3>
+                    <form id="change-password-form" class="space-y-3">
+                        <label for="currentPassword" class="block font-medium mb-1">Current Password</label>
+                        <div class="relative mb-2">
+                            <input id="currentPassword" type="password" class="w-full border px-3 py-2 rounded pr-10"
+                                required />
+                            <button type="button" tabindex="-1"
+                                class="show-password absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                                data-target="currentPassword">Show</button>
+                        </div>
+                        <label for="newPassword" class="block font-medium mb-1">New Password</label>
+                        <div class="relative mb-2">
+                            <input id="newPassword" type="password" class="w-full border px-3 py-2 rounded pr-10"
+                                required minlength="6" />
+                            <button type="button" tabindex="-1"
+                                class="show-password absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                                data-target="newPassword">Show</button>
+                        </div>
+                        <label for="confirmNewPassword" class="block font-medium mb-1">Confirm New Password</label>
+                        <div class="relative mb-4">
+                            <input id="confirmNewPassword" type="password" class="w-full border px-3 py-2 rounded pr-10"
+                                required minlength="6" />
+                            <button type="button" tabindex="-1"
+                                class="show-password absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                                data-target="confirmNewPassword">Show</button>
+                        </div>
+                        <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Submit</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+            <button id="close-profile-modal"
+                class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Name</label>
+                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Profile modal logic
+        const userInfoSection = document.getElementById('user-info');
+        if (userInfoSection) {
+            userInfoSection.style.cursor = 'pointer';
+            userInfoSection.addEventListener('click', () => {
+                const modal = document.getElementById('profile-modal');
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                document.getElementById('profile-name').textContent = userData.name || '';
+                document.getElementById('profile-email').textContent = userData.email || '';
+                modal.classList.remove('hidden');
+            });
+        }
+        document.getElementById('close-profile-modal').onclick = () => {
+            document.getElementById('profile-modal').classList.add('hidden');
+        };
+    </script>
 </body>
 
 </html>

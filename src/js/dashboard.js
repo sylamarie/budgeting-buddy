@@ -23,7 +23,7 @@ function loadDashboardData() {
 function updateHeaderStats(stats) {
     // Update current balance in header
     const currentBalance = stats.monthlyIncome - stats.monthlyExpenses;
-    document.getElementById('current-balance').textContent = `$${currentBalance.toFixed(2)}`;
+    document.getElementById('current-balance').textContent = `${getCurrencySymbol()}${formatAmount(currentBalance)}`;
     
     // Color code the balance
     const balanceElement = document.getElementById('current-balance');
@@ -39,18 +39,24 @@ function updateSummaryCards(stats) {
     const allIncome = dataManager.getIncome().reduce((sum, item) => sum + parseFloat(item.amount), 0);
     const allExpenses = dataManager.getExpenses().reduce((sum, item) => sum + parseFloat(item.amount), 0);
     const savingsProgress = dataManager.getSavings().reduce((sum, goal) => sum + parseFloat(goal.savedAmount), 0);
-    
-    document.getElementById('total-income').textContent = `$${allIncome.toFixed(2)}`;
-    document.getElementById('total-expenses').textContent = `$${allExpenses.toFixed(2)}`;
-    document.getElementById('savings-progress').textContent = `$${savingsProgress.toFixed(2)}`;
+    // Update currency icon in summary cards
+    const incomeIcon = document.querySelector('#total-income').parentElement.previousElementSibling;
+    const expensesIcon = document.querySelector('#total-expenses').parentElement.previousElementSibling;
+    const savingsIcon = document.querySelector('#savings-progress').parentElement.previousElementSibling;
+    if (incomeIcon) incomeIcon.innerHTML = `<span class='text-green-600 text-2xl font-bold'>${getCurrencySymbol()}</span>`;
+    if (expensesIcon) expensesIcon.innerHTML = `<span class='text-red-600 text-2xl font-bold'>${getCurrencySymbol()}</span>`;
+    if (savingsIcon) savingsIcon.innerHTML = `<span class='text-purple-600 text-2xl font-bold'>${getCurrencySymbol()}</span>`;
+    document.getElementById('total-income').textContent = `${getCurrencySymbol()}${formatAmount(allIncome)}`;
+    document.getElementById('total-expenses').textContent = `${getCurrencySymbol()}${formatAmount(allExpenses)}`;
+    document.getElementById('savings-progress').textContent = `${getCurrencySymbol()}${formatAmount(savingsProgress)}`;
 }
 
 function updateFinalSummary(stats) {
-    document.getElementById('monthly-income').textContent = `$${stats.monthlyIncome.toFixed(2)}`;
-    document.getElementById('monthly-expenses').textContent = `$${stats.monthlyExpenses.toFixed(2)}`;
+    document.getElementById('monthly-income').textContent = `${getCurrencySymbol()}${formatAmount(stats.monthlyIncome)}`;
+    document.getElementById('monthly-expenses').textContent = `${getCurrencySymbol()}${formatAmount(stats.monthlyExpenses)}`;
     
     const netBalance = stats.monthlyIncome - stats.monthlyExpenses;
-    document.getElementById('net-balance').textContent = `$${netBalance.toFixed(2)}`;
+    document.getElementById('net-balance').textContent = `${getCurrencySymbol()}${formatAmount(netBalance)}`;
     
     // Color code the net balance
     const netBalanceElement = document.getElementById('net-balance');
@@ -117,7 +123,7 @@ function createExpensesChart() {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: $${context.parsed.toFixed(2)} (${percentage}%)`;
+                            return `${context.label}: ${getCurrencySymbol()}${context.parsed.toFixed(2)} (${percentage}%)`;
                         }
                     }
                 }
@@ -192,7 +198,7 @@ function createMonthlyOverviewChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                            return `${context.dataset.label}: ${getCurrencySymbol()}${context.parsed.y.toFixed(2)}`;
                         }
                     }
                 }
@@ -202,7 +208,7 @@ function createMonthlyOverviewChart() {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toFixed(0);
+                            return getCurrencySymbol() + value.toFixed(0);
                         }
                     }
                 }
@@ -219,3 +225,21 @@ function generateColors(count) {
     ];
     return colors.slice(0, count);
 }
+
+function getCurrencySymbol() {
+    if (typeof dataManager !== 'undefined') {
+        const c = dataManager.getSetting('currency', 'USD');
+        const map = {USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', PHP: '₱', SGD: 'S$', CNY: '¥', KRW: '₩', INR: '₹'};
+        return map[c] || '$';
+    }
+    return '$';
+}
+
+function formatAmount(amount) {
+    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+window.addEventListener('currencyChanged', () => {
+  // Re-run all rendering functions that use currency
+  renderDashboard();
+});

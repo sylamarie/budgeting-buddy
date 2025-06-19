@@ -18,87 +18,130 @@
 
     <!-- Protected Content -->
     <div class="protected-content">
-    <main class="container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
+        <main class="container mx-auto px-4 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
                 <p class="text-gray-600">Monitor and manage your expenses</p>
-        </div>
+            </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Add Expense Form -->
-            <div class="bg-white rounded-xl p-6 shadow">
-                <h2 class="text-xl font-bold mb-2">Add New Expense</h2>
-                <p class="text-sm text-gray-500 mb-4">Record a new expense entry</p>
-                <form id="expense-form" class="space-y-4">
-                    <div>
-                        <label for="amount" class="block text-sm font-medium">Amount</label>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Add Expense Form -->
+                <div class="bg-white rounded-xl p-6 shadow">
+                    <h2 class="text-xl font-bold mb-2">Add New Expense</h2>
+                    <p class="text-sm text-gray-500 mb-4">Record a new expense entry</p>
+                    <form id="expense-form" class="space-y-4">
+                        <div>
+                            <label for="amount" class="block text-sm font-medium">Amount</label>
                             <input type="number" id="amount" step="0.01" required
                                 class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
+                        </div>
 
-                    <div>
-                        <label for="category" class="block text-sm font-medium">Category</label>
-                            <select id="category" required class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select category</option>
-                                <option value="Food">Food & Dining</option>
-                                <option value="Transportation">Transportation</option>
-                                <option value="Housing">Housing</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Healthcare">Healthcare</option>
-                                <option value="Education">Education</option>
-                                <option value="Other">Other</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label for="category" class="block text-sm font-medium">Category</label>
+                            <select id="category" required
+                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select category</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label for="date" class="block text-sm font-medium">Date</label>
-                            <input type="date" id="date" required class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
+                        <div>
+                            <label for="date" class="block text-sm font-medium">Date</label>
+                            <input type="date" id="date" required
+                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
 
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors">
-                        Add Expense
-                    </button>
-                </form>
-            </div>
+                        <button type="submit"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors">
+                            Add Expense
+                        </button>
+                    </form>
+                </div>
 
-            <!-- Summary Section -->
-            <div class="bg-white rounded-xl p-6 shadow">
-                <h2 class="text-xl font-bold mb-2">Expense Summary</h2>
+                <!-- Summary Section -->
+                <div class="bg-white rounded-xl p-6 shadow">
+                    <h2 class="text-xl font-bold mb-2">Expense Summary</h2>
                     <p class="text-sm text-gray-500 mb-4">Your total expenses overview</p>
 
-                <div class="text-center p-6 bg-red-50 rounded-lg mb-6">
-                    <p class="text-sm text-red-600 font-medium mb-2">Total Expenses</p>
-                    <p id="total-expenses" class="text-4xl font-bold text-red-700">$0</p>
-                </div>
+                    <div class="text-center p-6 bg-red-50 rounded-lg mb-6">
+                        <p class="text-sm text-red-600 font-medium mb-2">Total Expenses</p>
+                        <p id="total-expenses" class="text-4xl font-bold text-red-700">$0</p>
+                    </div>
 
-                <div>
+                    <div>
                         <h3 class="font-semibold text-gray-900 mb-4">Recent Entries</h3>
-                    <div id="recent-expenses" class="space-y-3"></div>
+                        <div id="recent-expenses" class="space-y-3"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Full Expense List -->
-        <div class="bg-white rounded-xl p-6 shadow mt-8">
-            <h2 class="text-xl font-bold mb-2">All Expense Entries</h2>
-            <p class="text-sm text-gray-500 mb-4">Complete list of your expense records</p>
-            <div id="all-expenses" class="space-y-3"></div>
-        </div>
-    </main>
+            <!-- Full Expense List -->
+            <div class="bg-white rounded-xl p-6 shadow mt-8">
+                <h2 class="text-xl font-bold mb-2">All Expense Entries</h2>
+                <p class="text-sm text-gray-500 mb-4">Complete list of your expense records</p>
+                <div id="all-expenses" class="space-y-3"></div>
+            </div>
+        </main>
     </div>
 
-    <!-- Login Required Message -->
-    <div class="auth-form flex items-center justify-center min-h-screen">
-        <div class="text-center">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Login Required</h2>
-            <p class="text-gray-600 mb-6">Please log in to access your expense tracking.</p>
-            <a href="/src/html/login.html" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
-                Go to Login
-            </a>
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+            <button id="close-profile-modal"
+                class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Name</label>
+                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+            </div>
         </div>
     </div>
+    <script>
+        // Profile modal logic
+        const userInfoSection = document.getElementById('user-info');
+        if (userInfoSection) {
+            userInfoSection.style.cursor = 'pointer';
+            userInfoSection.addEventListener('click', (e) => {
+                if (e.target.classList.contains('logout-btn')) return;
+                if (
+                    e.target.id === 'user-info' ||
+                    e.target.id === 'user-name' ||
+                    e.target.id === 'user-initials' ||
+                    e.target.closest('#user-info')
+                ) {
+                    const modal = document.getElementById('profile-modal');
+                    if (modal) {
+                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                        const nameDiv = document.getElementById('profile-name');
+                        const emailDiv = document.getElementById('profile-email');
+                        if (nameDiv) nameDiv.textContent = userData.name || '';
+                        if (emailDiv) emailDiv.textContent = userData.email || '';
+                        modal.classList.remove('hidden');
+                    }
+                }
+            });
+            const logoutBtn = userInfoSection.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (window.auth && typeof window.auth.logout === 'function') {
+                        window.auth.logout();
+                    } else if (typeof auth !== 'undefined' && typeof auth.logout === 'function') {
+                        auth.logout();
+                    }
+                });
+            }
+        }
+        const closeBtn = document.getElementById('close-profile-modal');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                document.getElementById('profile-modal').classList.add('hidden');
+            };
+        }
+    </script>
 </body>
 
 </html>

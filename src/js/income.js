@@ -29,7 +29,7 @@ function loadIncomeData() {
 
 function updateTotalIncome(incomes) {
     const total = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
-    document.getElementById('total-income').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('total-income').textContent = `${getCurrencySymbol()}${formatAmount(total)}`;
 }
 
 function displayRecentIncomes(incomes) {
@@ -44,7 +44,7 @@ function displayRecentIncomes(incomes) {
     recentContainer.innerHTML = recentIncomes.map(income => `
         <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
             <div>
-                <p class="font-medium text-gray-900">$${parseFloat(income.amount).toFixed(2)}</p>
+                <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(income.amount)}</p>
                 <p class="text-sm text-gray-600">${income.category} • ${new Date(income.date).toLocaleDateString()}</p>
             </div>
         </div>
@@ -64,10 +64,10 @@ function displayAllIncomes(incomes) {
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-medium">$$</span>
+                        <span class="text-green-600 font-medium">${getCurrencySymbol()}</span>
                     </div>
                     <div>
-                        <p class="font-medium text-gray-900">$${parseFloat(income.amount).toFixed(2)}</p>
+                        <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(income.amount)}</p>
                         <p class="text-sm text-gray-600">${income.category}</p>
                     </div>
                 </div>
@@ -197,3 +197,20 @@ function showMessage(message, type) {
         }
     }, 3000);
 }
+
+function getCurrencySymbol() {
+    if (typeof dataManager !== 'undefined') {
+        const c = dataManager.getSetting('currency', 'USD');
+        const map = {USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', PHP: '₱', SGD: 'S$', CNY: '¥', KRW: '₩', INR: '₹'};
+        return map[c] || '$';
+    }
+    return '$';
+}
+
+function formatAmount(amount) {
+    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+window.addEventListener('currencyChanged', () => {
+  renderIncome();
+});
