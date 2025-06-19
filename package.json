@@ -4,8 +4,9 @@
     "description": "A simple budgeting app to track income, expenses, and savings goals.",
     "main": "index.js",
     "scripts": {
-        "lint": "eslint src/js/*.js",
-        "start": "live-server"
+    "lint": "eslint src/js/*.js",
+    "start": "live-server",
+    "dev": "pnpm run start"
     },
     "author": "Your Name",
     "license": "MIT",

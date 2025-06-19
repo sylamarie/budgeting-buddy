@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budgeting Buddy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/lucide@latest" />
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9fafb;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Navbar will be loaded here -->
+    <div id="navbar-placeholder"></div>
+
+    <main>
+        <div id="page-index" class="page">Welcome to Budgeting Buddy!</div>
+        <div id="page-dashboard" class="page">This is the Dashboard page.</div>
+        <div id="page-income" class="page">Track your income here.</div>
+        <div id="page-expenses" class="page">Manage your expenses here.</div>
+        <div id="page-savings" class="page">Track your savings goals here.</div>
+        <div id="page-settings" class="page">Adjust your settings here.</div>
+        <div id="page-login" class="page">Login to your account.</div>
+        <div id="page-register" class="page">Register a new account.</div>
+        <div id="page-notfound" class="page">404 - Page Not Found</div>
+    </main>
+
+    <script>
+        // Load navbar.html into the placeholder
+        fetch("navbar.html")
+            .then((res) => res.text())
+            .then((html) => {
+                document.getElementById("navbar-placeholder").innerHTML = html;
+
+                // Re-initialize Lucide icons
+                if (typeof lucide !== "undefined") {
+                    lucide.createIcons();
+                }
+
+                // Dynamically load navbar.js to activate mobile menu, highlighting, etc.
+                const script = document.createElement("script");
+                script.src = "navbar.js";
+                script.defer = true;
+                document.body.appendChild(script);
+            });
+
+        // SPA-like routing
+        function navigate(path) {
+            const routes = [
+                "/", "/dashboard", "/income", "/expenses", "/savings",
+                "/settings", "/login", "/register"
+            ];
+            const pageId = "page-" + (path === "/" ? "index" : path.slice(1));
+
+            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+
+            if (routes.includes(path)) {
+                document.getElementById(pageId).classList.add("active");
+            } else {
+                document.getElementById("page-notfound").classList.add("active");
+            }
+
+            // Optional: Update URL hash
+            window.location.hash = path;
+        }
+
+        // Initial load
+        window.onload = () => {
+            const hash = window.location.hash.replace("#", "") || "/";
+            navigate(hash);
+        };
+
+        // Handle hash changes (e.g. back/forward navigation)
+        window.onhashchange = () => {
+            const hash = window.location.hash.replace("#", "") || "/";
+            navigate(hash);
+        };
+    </script>
+
+</body>
+
+</html>

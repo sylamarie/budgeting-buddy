@@ -1,132 +1,122 @@
-// savings.js
-// Manage savings goals, add new goals, and show progress bars
+document.addEventListener("DOMContentLoaded", () => {
+  let goals = [
+    { id: 1, goalName: "Emergency Fund", targetAmount: 10000, savedAmount: 3500, createdDate: "2025-01-01" },
+    { id: 2, goalName: "Vacation to Japan", targetAmount: 5000, savedAmount: 1200, createdDate: "2025-02-15" },
+    { id: 3, goalName: "New Car", targetAmount: 15000, savedAmount: 8000, createdDate: "2025-03-01" },
+  ];
 
-const savingsForm = document.getElementById('savingsForm');
-const savingsList = document.getElementById('savingsList');
+  const form = document.getElementById("goal-form");
+  const goalsList = document.getElementById("goals-list");
+  const emptyMessage = document.getElementById("empty-message");
 
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem('currentUser'));
-}
+  const updateStats = () => {
+    const totalTarget = goals.reduce((sum, g) => sum + g.targetAmount, 0);
+    const totalSaved = goals.reduce((sum, g) => sum + g.savedAmount, 0);
+    const progress = totalTarget ? (totalSaved / totalTarget) * 100 : 0;
 
-function saveSavingsGoal(goal) {
-  const savingsGoals = JSON.parse(localStorage.getItem('savingsGoals')) || [];
-  savingsGoals.push(goal);
-  localStorage.setItem('savingsGoals', JSON.stringify(savingsGoals));
-}
+    document.getElementById("total-progress-percent").textContent = `${progress.toFixed(1)}%`;
+    document.getElementById("overall-bar").style.width = `${progress}%`;
+    document.getElementById("total-progress-text").textContent = `$${totalSaved.toLocaleString()} of $${totalTarget.toLocaleString()}`;
+    document.getElementById("total-saved").textContent = `$${totalSaved.toLocaleString()}`;
+    document.getElementById("active-goals").textContent = goals.length;
 
-function loadSavingsGoals(email) {
-  const savingsGoals = JSON.parse(localStorage.getItem('savingsGoals')) || [];
-  return savingsGoals.filter(goal => goal.email === email);
-}
+    if (goals.length === 0) {
+      emptyMessage.classList.remove("hidden");
+    } else {
+      emptyMessage.classList.add("hidden");
+    }
+  };
 
-function createProgressBar(percentage) {
-  const progressBar = document.createElement('div');
-  progressBar.className = 'progress-bar';
+  const renderGoals = () => {
+    goalsList.innerHTML = "";
+    goals.forEach(goal => {
+      const container = document.createElement("div");
+      container.className = "p-6 bg-white rounded-lg border shadow-sm";
 
-  const progressFill = document.createElement('div');
-  progressFill.className = 'progress-fill';
-  progressFill.style.width = `${Math.min(percentage, 100)}%`;
-  progressFill.textContent = `${Math.min(percentage, 100).toFixed(0)}%`;
+      const progress = (goal.savedAmount / goal.targetAmount) * 100;
+      const isCompleted = progress >= 100;
 
-  progressBar.appendChild(progressFill);
-  return progressBar;
-}
+      container.innerHTML = `
+        <div class="flex justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold">${goal.goalName}</h3>
+            <p class="text-sm text-gray-500">Created on ${new Date(goal.createdDate).toLocaleDateString()}</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="edit-btn text-sm border px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            <button class="delete-btn text-sm text-red-600 border border-red-600 px-3 py-1 rounded hover:bg-red-50">Delete</button>
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-1">
+            <span>Progress</span>
+            <span class="${isCompleted ? 'text-green-600' : 'text-blue-600'} font-bold">${progress.toFixed(1)}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded h-2 mb-1">
+            <div class="bg-blue-500 h-2 rounded" style="width: ${Math.min(progress, 100)}%;"></div>
+          </div>
+          <div class="flex justify-between text-sm text-gray-600">
+            <span>$${goal.savedAmount.toLocaleString()}</span>
+            <span>$${goal.targetAmount.toLocaleString()}</span>
+          </div>
+        </div>
+        ${
+          isCompleted
+            ? `<div class="text-center bg-green-50 border border-green-200 p-2 rounded text-green-700 font-medium">🎉 Goal Completed!</div>`
+            : `<div class="flex gap-2">
+                <input type="number" placeholder="Add amount" class="update-input flex-1 border px-2 py-1 rounded" />
+                <button class="add-btn px-3 py-1 border rounded hover:bg-gray-100">Add</button>
+              </div>`
+        }
+      `;
 
-function renderSavingsList(goals) {
-  savingsList.innerHTML = '';
+      container.querySelector(".delete-btn").addEventListener("click", () => {
+        goals = goals.filter(g => g.id !== goal.id);
+        renderGoals();
+        updateStats();
+      });
 
-  if (goals.length === 0) {
-    savingsList.innerHTML = '<li>No savings goals yet.</li>';
-    return;
-  }
+      const addBtn = container.querySelector(".add-btn");
+      const input = container.querySelector(".update-input");
+      if (addBtn && input) {
+        addBtn.addEventListener("click", () => {
+          const addAmount = parseFloat(input.value || "0");
+          if (!isNaN(addAmount) && addAmount > 0) {
+            goal.savedAmount = Math.min(goal.savedAmount + addAmount, goal.targetAmount);
+            renderGoals();
+            updateStats();
+          }
+        });
+      }
 
-  goals.forEach(goal => {
-    const li = document.createElement('li');
-
-    const saved = Number(goal.savedSoFar);
-    const target = Number(goal.goalAmount);
-    const progressPercent = (saved / target) * 100;
-
-    li.innerHTML = `
-      <h3>${goal.goalName}</h3>
-      <div class="amounts">Saved: $${saved.toFixed(2)} / Target: $${target.toFixed(2)}</div>
-    `;
-
-    const progressBar = createProgressBar(progressPercent);
-    li.appendChild(progressBar);
-
-    savingsList.appendChild(li);
-  });
-}
-
-function resetForm() {
-  savingsForm.reset();
-}
-
-function validateFormData(goalName, goalAmount, savedSoFar) {
-  if (goalName.length < 3) {
-    alert('Goal name must be at least 3 characters.');
-    return false;
-  }
-  if (goalAmount <= 0) {
-    alert('Target amount must be greater than zero.');
-    return false;
-  }
-  if (savedSoFar < 0) {
-    alert('Saved amount cannot be negative.');
-    return false;
-  }
-  if (savedSoFar > goalAmount) {
-    alert('Saved amount cannot be more than target amount.');
-    return false;
-  }
-  return true;
-}
-
-  // ✅ Hamburger menu logic
-  const hamburger = document.getElementById("hamburger");
-  const navMenu = document.getElementById("navMenu");
-
-  if (hamburger && navMenu) {
-    hamburger.addEventListener("click", () => {
-      navMenu.classList.toggle("show");
+      goalsList.appendChild(container);
     });
-  }
+  };
 
-function init() {
-  const user = getCurrentUser();
-  if (!user) {
-    window.location.href = 'login.html';
-    return;
-  }
-
-  // Load existing savings goals for user
-  const goals = loadSavingsGoals(user.email);
-  renderSavingsList(goals);
-
-  savingsForm.addEventListener('submit', (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
+    const name = document.getElementById("goalName").value.trim();
+    const target = parseFloat(document.getElementById("targetAmount").value);
+    const saved = parseFloat(document.getElementById("savedAmount").value);
 
-    const goalName = savingsForm.goalName.value.trim();
-    const goalAmount = parseFloat(savingsForm.goalAmount.value);
-    const savedSoFar = parseFloat(savingsForm.savedSoFar.value);
+    if (!name || isNaN(target) || isNaN(saved)) {
+      alert("Please fill in all fields correctly.");
+      return;
+    }
 
-    if (!validateFormData(goalName, goalAmount, savedSoFar)) return;
+    goals.push({
+      id: Date.now(),
+      goalName: name,
+      targetAmount: target,
+      savedAmount: saved,
+      createdDate: new Date().toISOString().split("T")[0],
+    });
 
-    const newGoal = {
-      email: user.email,
-      goalName,
-      goalAmount,
-      savedSoFar,
-    };
-
-    saveSavingsGoal(newGoal);
-
-    // Update UI
-    const updatedGoals = loadSavingsGoals(user.email);
-    renderSavingsList(updatedGoals);
-    resetForm();
+    form.reset();
+    renderGoals();
+    updateStats();
   });
-}
 
-window.addEventListener('DOMContentLoaded', init);
+  renderGoals();
+  updateStats();
+});

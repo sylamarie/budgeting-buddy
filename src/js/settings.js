@@ -1,105 +1,73 @@
-// settings.js
-// Handle currency preference and spending categories management
+document.addEventListener("DOMContentLoaded", () => {
+  let currency = "USD";
+  let categories = [
+    "Food", "Transportation", "Rent", "Utilities", "Entertainment", "Healthcare", "Shopping"
+  ];
 
-const currencySelect = document.getElementById('currencySelect');
-const categoryForm = document.getElementById('categoryForm');
-const categoryInput = document.getElementById('categoryInput');
-const categoryList = document.getElementById('categoryList');
-const logoutBtn = document.getElementById('logoutBtn');
+  const currencySelect = document.getElementById("currency");
+  const currentCurrencyDisplay = document.getElementById("current-currency");
 
-const AVAILABLE_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY'];
+  const categoryForm = document.getElementById("category-form");
+  const newCategoryInput = document.getElementById("newCategory");
+  const categoryList = document.getElementById("category-list");
 
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem('currentUser'));
-}
+  const currencyNames = {
+    USD: "US Dollar", EUR: "Euro", GBP: "British Pound",
+    CAD: "Canadian Dollar", AUD: "Australian Dollar", JPY: "Japanese Yen"
+  };
 
-function loadSettings(email) {
-  const settings = JSON.parse(localStorage.getItem('settings')) || {};
-  return settings[email] || { currency: 'USD', categories: ['Food', 'Bills', 'Fun', 'Rent'] };
-}
+  function updateCurrencyDisplay() {
+    currentCurrencyDisplay.textContent = `${currencyNames[currency]} (${currency})`;
+  }
 
-function saveSettings(email, userSettings) {
-  const settings = JSON.parse(localStorage.getItem('settings')) || {};
-  settings[email] = userSettings;
-  localStorage.setItem('settings', JSON.stringify(settings));
-}
+  function renderCategories() {
+    categoryList.innerHTML = "";
+    categories.forEach(cat => {
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between p-3 bg-white rounded-lg border";
 
-function populateCurrencySelect(selectedCurrency) {
-  currencySelect.innerHTML = '';
-  AVAILABLE_CURRENCIES.forEach(currency => {
-    const option = document.createElement('option');
-    option.value = currency;
-    option.textContent = currency;
-    if (currency === selectedCurrency) option.selected = true;
-    currencySelect.appendChild(option);
-  });
-}
+      const name = document.createElement("span");
+      name.textContent = cat;
+      name.className = "font-medium";
 
-function renderCategories(categories) {
-  categoryList.innerHTML = '';
-  categories.forEach((cat, index) => {
-    const li = document.createElement('li');
-    li.textContent = cat;
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+      delBtn.className = "text-red-600 text-sm border border-red-600 px-3 py-1 rounded hover:bg-red-50";
+      delBtn.onclick = () => {
+        categories = categories.filter(c => c !== cat);
+        renderCategories();
+        alert("Category deleted");
+      };
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '✕';
-    deleteBtn.setAttribute('aria-label', `Delete category ${cat}`);
-    deleteBtn.addEventListener('click', () => {
-      categories.splice(index, 1);
-      saveSettings(currentUser.email, { currency: currentSettings.currency, categories });
-      renderCategories(categories);
-    });
-
-    li.appendChild(deleteBtn);
-    categoryList.appendChild(li);
-  });
-}
-
-  // ✅ Hamburger menu logic
-  const hamburger = document.getElementById("hamburger");
-  const navMenu = document.getElementById("navMenu");
-
-  if (hamburger && navMenu) {
-    hamburger.addEventListener("click", () => {
-      navMenu.classList.toggle("show");
+      row.appendChild(name);
+      row.appendChild(delBtn);
+      categoryList.appendChild(row);
     });
   }
 
-let currentUser = null;
-let currentSettings = null;
-
-function init() {
-  currentUser = getCurrentUser();
-  if (!currentUser) {
-    window.location.href = 'login.html';
-    return;
-  }
-
-  currentSettings = loadSettings(currentUser.email);
-
-  populateCurrencySelect(currentSettings.currency);
-  renderCategories(currentSettings.categories);
-
-  currencySelect.addEventListener('change', () => {
-    currentSettings.currency = currencySelect.value;
-    saveSettings(currentUser.email, currentSettings);
+  currencySelect.addEventListener("change", (e) => {
+    currency = e.target.value;
+    updateCurrencyDisplay();
+    alert(`Currency updated to ${currency}`);
   });
 
-  categoryForm.addEventListener('submit', e => {
+  categoryForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const newCategory = categoryInput.value.trim();
-    if (newCategory && !currentSettings.categories.includes(newCategory)) {
-      currentSettings.categories.push(newCategory);
-      saveSettings(currentUser.email, currentSettings);
-      renderCategories(currentSettings.categories);
-      categoryInput.value = '';
+    const newCat = newCategoryInput.value.trim();
+    if (!newCat) {
+      alert("Please enter a category name.");
+      return;
     }
+    if (categories.includes(newCat)) {
+      alert("Category already exists.");
+      return;
+    }
+    categories.push(newCat);
+    newCategoryInput.value = "";
+    renderCategories();
+    alert("Category added successfully!");
   });
 
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
-  });
-}
-
-window.addEventListener('DOMContentLoaded', init);
+  updateCurrencyDisplay();
+  renderCategories();
+});

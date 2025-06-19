@@ -2,48 +2,97 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Budgeting Buddy - Settings</title>
-    <link rel="stylesheet" href="../css/styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Roboto&display=swap"
-        rel="stylesheet" />
+    <meta charset="UTF-8">
+    <title>Settings | Budgeting Buddy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="settings.js"></script>
 </head>
 
-<body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="dashboard.html" class="logo">Budgeting Buddy</a>
-        </div>
-        <div class="hamburger" id="hamburger">&#9776;</div>
-        <div class="nav-right" id="navMenu">
-            <a href="income.html">Income</a>
-            <a href="expenses.html">Expenses</a>
-            <a href="savings.html">Savings</a>
-            <a href="settings.html">Settings</a>
-            <a href="#" id="logoutBtn">Logout</a>
-        </div>
+<body class="min-h-screen bg-gray-50">
+
+    <!-- Navbar Placeholder -->
+    <nav class="bg-white shadow px-4 py-4 mb-8">
+        <h1 class="text-xl font-bold text-blue-600">Budgeting Buddy</h1>
     </nav>
 
-    <main class="settings-main">
-        <section class="settings-section">
-            <h2>Currency Preference</h2>
-            <select id="currencySelect" aria-label="Select preferred currency">
-                <!-- Options added dynamically -->
-            </select>
-        </section>
+    <div class="container mx-auto px-4 py-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+        <p class="text-gray-600 mb-8">Customize your budgeting experience</p>
 
-        <section class="settings-section">
-            <h2>Manage Spending Categories</h2>
-            <form id="categoryForm">
-                <input type="text" id="categoryInput" placeholder="New category name" required />
-                <button type="submit" class="btn">Add Category</button>
-            </form>
-            <ul id="categoryList"></ul>
-        </section>
-    </main>
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Currency Settings -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-semibold mb-2">Currency Preference</h2>
+                <p class="text-gray-600 mb-4">Choose your preferred currency for all transactions</p>
+                <label for="currency" class="block font-medium mb-1">Default Currency</label>
+                <select id="currency" class="w-full border px-3 py-2 rounded mb-4">
+                    <option value="USD">$ US Dollar</option>
+                    <option value="EUR">€ Euro</option>
+                    <option value="GBP">£ British Pound</option>
+                    <option value="CAD">C$ Canadian Dollar</option>
+                    <option value="AUD">A$ Australian Dollar</option>
+                    <option value="JPY">¥ Japanese Yen</option>
+                </select>
+                <div class="p-4 bg-blue-50 rounded">
+                    <p class="text-sm text-blue-700">
+                        <strong>Current Currency:</strong>
+                        <span id="current-currency">US Dollar (USD)</span>
+                    </p>
+                    <p class="text-xs text-blue-600 mt-1">
+                        This will be applied to all new transactions and display formats.
+                    </p>
+                </div>
+            </div>
 
-    <script type="module" src="../js/settings.js"></script>
+            <!-- Category Management -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-semibold mb-2">Expense Categories</h2>
+                <p class="text-gray-600 mb-4">Manage your spending categories</p>
+                <form id="category-form" class="flex gap-2 mb-6">
+                    <input type="text" id="newCategory" placeholder="e.g. Hobbies"
+                        class="flex-1 border px-3 py-2 rounded" />
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Add
+                    </button>
+                </form>
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Current Categories</h3>
+                    <div id="category-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="bg-white rounded-xl shadow p-6 mt-8">
+            <h2 class="text-xl font-semibold mb-2">Account Settings</h2>
+            <p class="text-gray-600 mb-6">Manage your account preferences and data</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-4">Profile Settings</h3>
+                    <label for="displayName" class="block font-medium mb-1">Display Name</label>
+                    <input id="displayName" type="text" class="w-full border px-3 py-2 rounded mb-4" />
+                    <label for="email" class="block font-medium mb-1">Email Address</label>
+                    <input id="email" type="email" class="w-full border px-3 py-2 rounded mb-4" />
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full md:w-auto">
+                        Update Profile
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Data Management</h3>
+                    <button class="w-full border px-4 py-2 rounded mb-2">Export Data</button>
+                    <button class="w-full border px-4 py-2 rounded mb-2">Import Data</button>
+                    <button class="w-full border border-red-500 text-red-600 px-4 py-2 rounded hover:bg-red-50">
+                        Clear All Data
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Export your data for backup or import data from other budgeting apps.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

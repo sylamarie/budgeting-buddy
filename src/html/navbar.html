@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Budgeting Buddy - Navbar</title>
+    <script src="navbar.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/lucide@latest" />
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+    <nav class="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+          <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <a href="dashboard.html" class="text-2xl font-bold">
+              <span class="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                Budgeting Buddy
+              </span>
+            </a>
+      
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-1" id="desktop-nav">
+              <a href="dashboard.html" class="nav-link">
+                <button class="nav-button">Dashboard</button>
+              </a>
+              <a href="income.html" class="nav-link">
+                <button class="nav-button">Income</button>
+              </a>
+              <a href="expenses.html" class="nav-link">
+                <button class="nav-button">Expenses</button>
+              </a>
+              <a href="savings.html" class="nav-link">
+                <button class="nav-button">Savings</button>
+              </a>
+              <a href="settings.html" class="nav-link">
+                <button class="nav-button">Settings</button>
+              </a>
+              <button class="ml-4 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100">Logout</button>
+            </div>
+      
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden" id="menu-toggle">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          </div>
+      
+          <!-- Mobile Menu -->
+          <div class="md:hidden py-4 border-t border-gray-200 hidden" id="mobile-menu">
+            <div class="flex flex-col space-y-2">
+              <a href="dashboard.html" class="nav-link-mobile">
+                <button class="nav-button w-full text-left">Dashboard</button>
+              </a>
+              <a href="income.html" class="nav-link-mobile">
+                <button class="nav-button w-full text-left">Income</button>
+              </a>
+              <a href="expenses.html" class="nav-link-mobile">
+                <button class="nav-button w-full text-left">Expenses</button>
+              </a>
+              <a href="savings.html" class="nav-link-mobile">
+                <button class="nav-button w-full text-left">Savings</button>
+              </a>
+              <a href="settings.html" class="nav-link-mobile">
+                <button class="nav-button w-full text-left">Settings</button>
+              </a>
+              <button class="mt-4 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100 text-left w-full">Logout</button>
+            </div>
+          </div>
+        </div>
+      </nav><nav class="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <a href="dashboard.html" class="text-2xl font-bold">
+                    <span class="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                        Budgeting Buddy
+                    </span>
+                </a>
+    
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-1" id="desktop-nav">
+                    <a href="dashboard.html" class="nav-link">
+                        <button class="nav-button">Dashboard</button>
+                    </a>
+                    <a href="income.html" class="nav-link">
+                        <button class="nav-button">Income</button>
+                    </a>
+                    <a href="expenses.html" class="nav-link">
+                        <button class="nav-button">Expenses</button>
+                    </a>
+                    <a href="savings.html" class="nav-link">
+                        <button class="nav-button">Savings</button>
+                    </a>
+                    <a href="settings.html" class="nav-link">
+                        <button class="nav-button">Settings</button>
+                    </a>
+                    <button class="ml-4 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100">Logout</button>
+                </div>
+    
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden" id="menu-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+    
+            <!-- Mobile Menu -->
+            <div class="md:hidden py-4 border-t border-gray-200 hidden" id="mobile-menu">
+                <div class="flex flex-col space-y-2">
+                    <a href="dashboard.html" class="nav-link-mobile">
+                        <button class="nav-button w-full text-left">Dashboard</button>
+                    </a>
+                    <a href="income.html" class="nav-link-mobile">
+                        <button class="nav-button w-full text-left">Income</button>
+                    </a>
+                    <a href="expenses.html" class="nav-link-mobile">
+                        <button class="nav-button w-full text-left">Expenses</button>
+                    </a>
+                    <a href="savings.html" class="nav-link-mobile">
+                        <button class="nav-button w-full text-left">Savings</button>
+                    </a>
+                    <a href="settings.html" class="nav-link-mobile">
+                        <button class="nav-button w-full text-left">Settings</button>
+                    </a>
+                    <button
+                        class="mt-4 border border-gray-300 px-3 py-1 rounded hover:bg-gray-100 text-left w-full">Logout</button>
+                </div>
+            </div>
+        </div></nav>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Register | Budgeting Buddy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="register.js"></script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-xl shadow-lg">
+        <div class="text-center p-6 border-b border-gray-200">
+            <h1 class="text-3xl font-bold">
+                <span class="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                    Budgeting Buddy
+                </span>
+            </h1>
+            <p class="text-sm text-gray-600 mt-2">Create your account</p>
+        </div>
+
+        <div class="p-6">
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium">Full Name</label>
+                    <input id="name" type="text" placeholder="Your full name"
+                        class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium">Email</label>
+                    <input id="email" type="email" placeholder="you@example.com"
+                        class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium">Password</label>
+                    <input id="password" type="password" placeholder="Create a password"
+                        class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium">Confirm Password</label>
+                    <input id="confirmPassword" type="password" placeholder="Confirm your password"
+                        class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2 rounded">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-600">
+                    Already have an account?
+                    <a href="/login.html" class="text-blue-600 hover:text-blue-700 font-medium">Sign in here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

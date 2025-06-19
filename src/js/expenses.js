@@ -1,151 +1,97 @@
-// expenses.js
-// Handles adding expense records and displaying the list with currency conversion
+document.addEventListener("DOMContentLoaded", () => {
+  const expenseForm = document.getElementById("expense-form");
+  const totalDisplay = document.getElementById("total-expenses");
+  const recentContainer = document.getElementById("recent-expenses");
+  const allContainer = document.getElementById("all-expenses");
 
-import { convert } from './currency.js';
+  let expenses = [
+    { id: 1, amount: 1200, category: "Rent", date: "2025-06-01" },
+    { id: 2, amount: 350, category: "Food", date: "2025-06-02" },
+    { id: 3, amount: 80, category: "Transportation", date: "2025-06-03" },
+  ];
 
-const expenseForm = document.getElementById('expenseForm');
-const expenseList = document.getElementById('expenseList');
-
-let currentUser = null;
-let currentSettings = null;
-
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem('currentUser'));
-}
-
-function loadSettings(email) {
-  const settings = JSON.parse(localStorage.getItem('settings')) || {};
-  return settings[email] || { currency: 'USD' };
-}
-
-function formatCurrency(amount, currencySymbol = '$') {
-  return `${currencySymbol}${Number(amount).toFixed(2)}`;
-}
-
-function saveExpenseRecord(record) {
-  const expenseRecords = JSON.parse(localStorage.getItem('expenseRecords')) || [];
-  expenseRecords.push(record);
-  localStorage.setItem('expenseRecords', JSON.stringify(expenseRecords));
-}
-
-function loadExpenseRecords(email) {
-  const expenseRecords = JSON.parse(localStorage.getItem('expenseRecords')) || [];
-  return expenseRecords.filter(r => r.email === email);
-}
-
-async function renderExpenseList(records) {
-  expenseList.innerHTML = '';
-  if (records.length === 0) {
-    expenseList.innerHTML = '<li>No expense records yet.</li>';
-    return;
-  }
-
-  for (const r of records) {
-    const convertedAmount = await convert(r.amountUSD, 'USD', currentSettings.currency);
-    const currencySymbol = getCurrencySymbol(currentSettings.currency);
-
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span>${new Date(r.date).toLocaleDateString()}</span>
-      <span>${r.category}</span>
-      <span class="amount">${formatCurrency(convertedAmount, currencySymbol)}</span>
-    `;
-    expenseList.appendChild(li);
-  }
-}
-
-  // ✅ Hamburger menu logic
-  const hamburger = document.getElementById("hamburger");
-  const navMenu = document.getElementById("navMenu");
-
-  if (hamburger && navMenu) {
-    hamburger.addEventListener("click", () => {
-      navMenu.classList.toggle("show");
-    });
-  }
-
-function getCurrencySymbol(currencyCode) {
-  const symbols = {
-    USD: '$',
-    EUR: '€',
-    GBP: '£',
-    JPY: '¥',
-    AUD: 'A$',
-    CAD: 'C$',
-    CHF: 'CHF',
-    CNY: '¥',
-    SEK: 'kr',
-    NZD: 'NZ$',
+  const categoryColors = {
+    Food: "bg-red-100 text-red-700",
+    Transportation: "bg-orange-100 text-orange-700",
+    Rent: "bg-yellow-100 text-yellow-700",
+    Utilities: "bg-green-100 text-green-700",
+    Entertainment: "bg-blue-100 text-blue-700",
+    Other: "bg-gray-100 text-gray-700",
+    Shopping: "bg-purple-100 text-purple-700",
+    Healthcare: "bg-pink-100 text-pink-700"
   };
-  return symbols[currencyCode] || currencyCode + ' ';
-}
 
-function resetForm() {
-  expenseForm.reset();
-  expenseForm.expenseDate.value = new Date().toISOString().split('T')[0];
-}
+  const renderExpenses = () => {
+    // Total
+    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+    totalDisplay.textContent = `$${total.toLocaleString()}`;
 
-function validateFormData(amount, category, date) {
-  if (amount <= 0) {
-    alert('Amount must be greater than zero.');
-    return false;
-  }
-  if (!category) {
-    alert('Please select a category.');
-    return false;
-  }
-  if (!date) {
-    alert('Please select a date.');
-    return false;
-  }
-  return true;
-}
+    // Recent
+    const recent = expenses.slice(-3).reverse();
+    recentContainer.innerHTML = recent.map(renderEntry).join("");
 
-async function init() {
-  currentUser = getCurrentUser();
-  if (!currentUser) {
-    window.location.href = 'login.html';
-    return;
-  }
+    // All
+    allContainer.innerHTML = expenses.map((entry) => {
+      return `
+        <div class="flex items-center justify-between p-4 bg-white rounded-lg border hover:shadow-md transition-shadow">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-1 rounded-full text-xs font-medium ${categoryColors[entry.category] || 'bg-gray-100 text-gray-700'}">
+                ${entry.category}
+              </span>
+            </div>
+            <p class="text-sm text-gray-500">${new Date(entry.date).toLocaleDateString()}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xl font-bold text-red-600">$${entry.amount.toLocaleString()}</p>
+            <button class="mt-1 text-sm text-red-500 underline" onclick="deleteExpense(${entry.id})">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  };
 
-  currentSettings = loadSettings(currentUser.email);
+  const renderEntry = (entry) => `
+    <div class="flex items-center justify-between p-3 bg-white rounded-lg border">
+      <div>
+        <span class="px-2 py-1 rounded-full text-xs font-medium ${categoryColors[entry.category] || 'bg-gray-100 text-gray-700'}">
+          ${entry.category}
+        </span>
+        <p class="text-sm text-gray-500 mt-1">${entry.date}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-bold text-red-600">$${entry.amount.toLocaleString()}</p>
+      </div>
+    </div>
+  `;
 
-  const dateInput = expenseForm.expenseDate;
-  const todayStr = new Date().toISOString().split('T')[0];
-  dateInput.max = todayStr;
-  dateInput.value = todayStr;
+  window.deleteExpense = (id) => {
+    expenses = expenses.filter(e => e.id !== id);
+    renderExpenses();
+  };
 
-  const amountLabel = expenseForm.querySelector('label[for="expenseAmount"]');
-  amountLabel.textContent = `Amount (${currentSettings.currency})`;
-
-  const records = loadExpenseRecords(currentUser.email);
-  await renderExpenseList(records);
-
-  expenseForm.addEventListener('submit', async (e) => {
+  expenseForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    const amount = parseFloat(document.getElementById("amount").value);
+    const category = document.getElementById("category").value;
+    const date = document.getElementById("date").value;
 
-    const amountUserCurrency = parseFloat(expenseForm.expenseAmount.value);
-    const category = expenseForm.expenseCategory.value;
-    const date = expenseForm.expenseDate.value;
+    if (!amount || !category || !date) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
-    if (!validateFormData(amountUserCurrency, category, date)) return;
-
-    const amountUSD = await convert(amountUserCurrency, currentSettings.currency, 'USD');
-
-    const newRecord = {
-      email: currentUser.email,
-      amountUSD,
+    const newExpense = {
+      id: Date.now(),
+      amount,
       category,
       date,
     };
 
-    saveExpenseRecord(newRecord);
-
-    const updatedRecords = loadExpenseRecords(currentUser.email);
-    await renderExpenseList(updatedRecords);
-
-    resetForm();
+    expenses.push(newExpense);
+    expenseForm.reset();
+    renderExpenses();
   });
-}
 
-window.addEventListener('DOMContentLoaded', init);
+  renderExpenses();
+});

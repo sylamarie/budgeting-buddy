@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Expenses | Budgeting Buddy</title>
+    <title>Income | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="expenses.js"></script>
+    <script defer src="income.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
@@ -25,16 +25,16 @@
 
     <main class="container mx-auto px-4 py-8">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
-            <p class="text-gray-600">Monitor and categorize your spending</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Income Tracking</h1>
+            <p class="text-gray-600">Monitor and manage your income sources</p>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Add Expense Form -->
+            <!-- Add Income Form -->
             <div class="bg-white rounded-xl p-6 shadow">
-                <h2 class="text-xl font-bold mb-2">Add New Expense</h2>
-                <p class="text-sm text-gray-500 mb-4">Record a new expense entry</p>
-                <form id="expense-form" class="space-y-4">
+                <h2 class="text-xl font-bold mb-2">Add New Income</h2>
+                <p class="text-sm text-gray-500 mb-4">Record a new income entry</p>
+                <form id="income-form" class="space-y-4">
                     <div>
                         <label for="amount" class="block text-sm font-medium">Amount</label>
                         <input type="number" id="amount" step="0.01"
@@ -45,13 +45,11 @@
                         <label for="category" class="block text-sm font-medium">Category</label>
                         <select id="category" class="mt-1 w-full border border-gray-300 rounded px-3 py-2">
                             <option value="">Select category</option>
-                            <option>Food</option>
-                            <option>Transportation</option>
-                            <option>Rent</option>
-                            <option>Utilities</option>
-                            <option>Entertainment</option>
-                            <option>Healthcare</option>
-                            <option>Shopping</option>
+                            <option>Salary</option>
+                            <option>Bonus</option>
+                            <option>Freelance</option>
+                            <option>Investment</option>
+                            <option>Gift</option>
                             <option>Other</option>
                         </select>
                     </div>
@@ -61,34 +59,34 @@
                         <input type="date" id="date" class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
                     </div>
 
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
-                        Add Expense
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
+                        Add Income
                     </button>
                 </form>
             </div>
 
             <!-- Summary Section -->
             <div class="bg-white rounded-xl p-6 shadow">
-                <h2 class="text-xl font-bold mb-2">Expense Summary</h2>
-                <p class="text-sm text-gray-500 mb-4">Your total spending overview</p>
+                <h2 class="text-xl font-bold mb-2">Income Summary</h2>
+                <p class="text-sm text-gray-500 mb-4">Your total income overview</p>
 
-                <div class="text-center p-6 bg-red-50 rounded-lg mb-6">
-                    <p class="text-sm text-red-600 font-medium mb-2">Total Expenses</p>
-                    <p id="total-expenses" class="text-4xl font-bold text-red-700">$0</p>
+                <div class="text-center p-6 bg-green-50 rounded-lg mb-6">
+                    <p class="text-sm text-green-600 font-medium mb-2">Total Income</p>
+                    <p id="total-income" class="text-4xl font-bold text-green-700">$0</p>
                 </div>
 
                 <div>
-                    <h3 class="font-semibold text-gray-900 mb-4">Recent Expenses</h3>
-                    <div id="recent-expenses" class="space-y-3"></div>
+                    <h3 class="font-semibold text-gray-900 mb-4">Recent Entries</h3>
+                    <div id="recent-incomes" class="space-y-3"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Full Expense List -->
+        <!-- Full Income List -->
         <div class="bg-white rounded-xl p-6 shadow mt-8">
-            <h2 class="text-xl font-bold mb-2">All Expense Entries</h2>
-            <p class="text-sm text-gray-500 mb-4">Complete list of your expense records</p>
-            <div id="all-expenses" class="space-y-3"></div>
+            <h2 class="text-xl font-bold mb-2">All Income Entries</h2>
+            <p class="text-sm text-gray-500 mb-4">Complete list of your income records</p>
+            <div id="all-incomes" class="space-y-3"></div>
         </div>
     </main>
 </body>
