@@ -1,59 +1,221 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const totalIncome = 4500;
-  const totalExpenses = 3200;
-  const balance = totalIncome - totalExpenses;
-  const savingsGoal = 10000;
-  const currentSavings = 2400;
-  const savingsProgress = (currentSavings / savingsGoal) * 100;
-
-  document.getElementById("totalIncome").textContent = `$${totalIncome.toLocaleString()}`;
-  document.getElementById("totalExpenses").textContent = `$${totalExpenses.toLocaleString()}`;
-  document.getElementById("balance").textContent = `$${balance.toLocaleString()}`;
-  document.getElementById("savingsProgress").textContent = `${savingsProgress.toFixed(1)}%`;
-  document.getElementById("savingsBar").style.width = `${savingsProgress}%`;
-  document.getElementById("savingsDetails").textContent = `$${currentSavings.toLocaleString()} of $${savingsGoal.toLocaleString()}`;
-
-  document.getElementById("incomeStat").textContent = `$${totalIncome.toLocaleString()}`;
-  document.getElementById("expenseStat").textContent = `$${totalExpenses.toLocaleString()}`;
-  document.getElementById("balanceStat").textContent = `$${balance.toLocaleString()}`;
-
-  const pieCtx = document.getElementById("pieChart").getContext("2d");
-  new Chart(pieCtx, {
-    type: "pie",
-    data: {
-      labels: ["Food", "Transportation", "Rent", "Utilities", "Entertainment"],
-      datasets: [{
-        data: [800, 600, 1200, 400, 200],
-        backgroundColor: ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"]
-      }]
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is authenticated
+    if (!auth.isUserLoggedIn()) {
+        return; // Auth system will handle the redirect
     }
-  });
 
-  const barCtx = document.getElementById("barChart").getContext("2d");
-  new Chart(barCtx, {
-    type: "bar",
-    data: {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-      datasets: [
-        {
-          label: "Income",
-          data: [4200, 4300, 4100, 4500, 4400, 4500],
-          backgroundColor: "#22c55e"
-        },
-        {
-          label: "Expenses",
-          data: [3100, 3300, 2900, 3200, 3000, 3200],
-          backgroundColor: "#ef4444"
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
+    // Initialize data manager
+    dataManager.init();
+
+    // Load dashboard data
+    loadDashboardData();
 });
+
+function loadDashboardData() {
+    const stats = dataManager.getDashboardStats();
+    updateHeaderStats(stats);
+    updateSummaryCards(stats);
+    createExpensesChart();
+    createMonthlyOverviewChart();
+    updateFinalSummary(stats);
+}
+
+function updateHeaderStats(stats) {
+    // Update current balance in header
+    const currentBalance = stats.monthlyIncome - stats.monthlyExpenses;
+    document.getElementById('current-balance').textContent = `$${currentBalance.toFixed(2)}`;
+    
+    // Color code the balance
+    const balanceElement = document.getElementById('current-balance');
+    if (currentBalance >= 0) {
+        balanceElement.className = 'text-3xl font-bold text-green-300';
+    } else {
+        balanceElement.className = 'text-3xl font-bold text-red-300';
+    }
+}
+
+function updateSummaryCards(stats) {
+    // Calculate totals (all time, not just monthly)
+    const allIncome = dataManager.getIncome().reduce((sum, item) => sum + parseFloat(item.amount), 0);
+    const allExpenses = dataManager.getExpenses().reduce((sum, item) => sum + parseFloat(item.amount), 0);
+    const savingsProgress = dataManager.getSavings().reduce((sum, goal) => sum + parseFloat(goal.savedAmount), 0);
+    
+    document.getElementById('total-income').textContent = `$${allIncome.toFixed(2)}`;
+    document.getElementById('total-expenses').textContent = `$${allExpenses.toFixed(2)}`;
+    document.getElementById('savings-progress').textContent = `$${savingsProgress.toFixed(2)}`;
+}
+
+function updateFinalSummary(stats) {
+    document.getElementById('monthly-income').textContent = `$${stats.monthlyIncome.toFixed(2)}`;
+    document.getElementById('monthly-expenses').textContent = `$${stats.monthlyExpenses.toFixed(2)}`;
+    
+    const netBalance = stats.monthlyIncome - stats.monthlyExpenses;
+    document.getElementById('net-balance').textContent = `$${netBalance.toFixed(2)}`;
+    
+    // Color code the net balance
+    const netBalanceElement = document.getElementById('net-balance');
+    if (netBalance >= 0) {
+        netBalanceElement.className = 'text-2xl font-bold text-green-600';
+    } else {
+        netBalanceElement.className = 'text-2xl font-bold text-red-600';
+    }
+}
+
+function createExpensesChart() {
+    const expenses = dataManager.getExpenses();
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    // Filter for current month
+    const monthlyExpenses = expenses.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+    });
+
+    // Group by category
+    const categoryData = {};
+    monthlyExpenses.forEach(expense => {
+        const category = expense.category;
+        const amount = parseFloat(expense.amount);
+        categoryData[category] = (categoryData[category] || 0) + amount;
+    });
+
+    const labels = Object.keys(categoryData);
+    const data = Object.values(categoryData);
+
+    if (labels.length === 0) {
+        document.getElementById('expenses-chart').parentElement.innerHTML = 
+            '<p class="text-gray-500 text-center py-8">No expense data for this month</p>';
+        return;
+    }
+
+    const ctx = document.getElementById('expenses-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: generateColors(labels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: $${context.parsed.toFixed(2)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createMonthlyOverviewChart() {
+    // Get data for the last 6 months
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+        months.push(monthName);
+        
+        // Calculate income for this month
+        const monthIncome = dataManager.getIncome()
+            .filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate.getMonth() === date.getMonth() && itemDate.getFullYear() === date.getFullYear();
+            })
+            .reduce((sum, item) => sum + parseFloat(item.amount), 0);
+        incomeData.push(monthIncome);
+        
+        // Calculate expenses for this month
+        const monthExpenses = dataManager.getExpenses()
+            .filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate.getMonth() === date.getMonth() && itemDate.getFullYear() === date.getFullYear();
+            })
+            .reduce((sum, item) => sum + parseFloat(item.amount), 0);
+        expenseData.push(monthExpenses);
+    }
+
+    const ctx = document.getElementById('monthly-overview-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: incomeData,
+                    backgroundColor: '#10B981',
+                    borderColor: '#059669',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Expenses',
+                    data: expenseData,
+                    backgroundColor: '#EF4444',
+                    borderColor: '#DC2626',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toFixed(0);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function generateColors(count) {
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
+        '#36A2EB', '#FFCE56', '#FF6384', '#C9CBCF', '#4BC0C0'
+    ];
+    return colors.slice(0, count);
+}

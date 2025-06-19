@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">New Dashboard Layout Test</h1>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Test Dashboard -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">View New Dashboard</h2>
+                <p class="text-sm text-gray-600 mb-4">See the redesigned dashboard with:</p>
+                <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                    <li>• "Take Control of Your Money" header</li>
+                    <li>• Current balance display</li>
+                    <li>• Total income/expenses/savings cards</li>
+                    <li>• Spending by category pie chart</li>
+                    <li>• Monthly overview bar chart</li>
+                    <li>• Final monthly summary</li>
+                </ul>
+                
+                <a href="src/html/dashboard.html" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Open New Dashboard
+                </a>
+            </div>
+            
+            <!-- Add Sample Data -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Add Sample Data</h2>
+                <p class="text-sm text-gray-600 mb-4">Add comprehensive sample data to see all charts:</p>
+                
+                <button onclick="addSampleData()" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Add Sample Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- New Layout Features -->
+        <div class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl font-semibold mb-4">New Dashboard Features</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Header Section:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• "Take Control of Your Money" title</li>
+                        <li>• Current balance prominently displayed</li>
+                        <li>• Color-coded balance (green/red)</li>
+                        <li>• Gradient background design</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Chart Section:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Left: Spending by Category (Pie Chart)</li>
+                        <li>• Right: Monthly Overview (Bar Chart)</li>
+                        <li>• Last 6 months of data</li>
+                        <li>• Income vs Expenses comparison</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sample Data Info -->
+        <div class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl font-semibold mb-4">Sample Data Details</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Current Month:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Salary: $3,500 (Employment)</li>
+                        <li>• Freelance: $800 (Freelance)</li>
+                        <li>• Investment: $200 (Investment)</li>
+                        <li>• Bonus: $500 (Employment)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Current Month Expenses:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Rent: $1,200 (Housing)</li>
+                        <li>• Groceries: $400 (Food)</li>
+                        <li>• Gas: $150 (Transportation)</li>
+                        <li>• Utilities: $200 (Utilities)</li>
+                        <li>• Entertainment: $300 (Entertainment)</li>
+                        <li>• Shopping: $250 (Shopping)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Historical Data:</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• 6 months of income/expense data</li>
+                        <li>• Varying amounts per month</li>
+                        <li>• Multiple categories represented</li>
+                        <li>• Savings goals with progress</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debug Info -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Current Data</h2>
+            <div id="debug-info" class="text-sm">
+                <p>Loading debug info...</p>
+            </div>
+            <button onclick="clearData()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Clear All Data
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debug-info');
+            const income = JSON.parse(localStorage.getItem('income') || '[]');
+            const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const savings = JSON.parse(localStorage.getItem('savings') || '[]');
+            
+            debugDiv.innerHTML = `
+                <p><strong>Income Entries:</strong> ${income.length}</p>
+                <p><strong>Expense Entries:</strong> ${expenses.length}</p>
+                <p><strong>Savings Goals:</strong> ${savings.length}</p>
+                <p><strong>Current Month:</strong> ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+            `;
+        }
+        
+        function addSampleData() {
+            const currentDate = new Date();
+            
+            // Sample Income Data (current month + historical)
+            const sampleIncome = [];
+            
+            // Current month income
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            
+            sampleIncome.push(
+                { id: 'inc1', amount: '3500', category: 'Employment', date: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0], description: 'Monthly Salary' },
+                { id: 'inc2', amount: '800', category: 'Freelance', date: new Date(currentYear, currentMonth, 15).toISOString().split('T')[0], description: 'Web Design Project' },
+                { id: 'inc3', amount: '200', category: 'Investment', date: new Date(currentYear, currentMonth, 20).toISOString().split('T')[0], description: 'Dividend Payment' },
+                { id: 'inc4', amount: '500', category: 'Employment', date: new Date(currentYear, currentMonth, 25).toISOString().split('T')[0], description: 'Performance Bonus' }
+            );
+            
+            // Historical income data (last 6 months)
+            for (let i = 1; i <= 5; i++) {
+                const date = new Date(currentYear, currentMonth - i, 1);
+                const monthIncome = 3000 + Math.random() * 2000; // Random income between 3000-5000
+                sampleIncome.push(
+                    { id: `inc-hist-${i}`, amount: monthIncome.toFixed(0), category: 'Employment', date: date.toISOString().split('T')[0], description: 'Monthly Salary' }
+                );
+            }
+            
+            // Sample Expense Data (current month + historical)
+            const sampleExpenses = [];
+            
+            // Current month expenses
+            sampleExpenses.push(
+                { id: 'exp1', amount: '1200', category: 'Housing', date: new Date(currentYear, currentMonth, 1).toISOString().split('T')[0], description: 'Monthly Rent' },
+                { id: 'exp2', amount: '400', category: 'Food', date: new Date(currentYear, currentMonth, 5).toISOString().split('T')[0], description: 'Weekly Groceries' },
+                { id: 'exp3', amount: '150', category: 'Transportation', date: new Date(currentYear, currentMonth, 10).toISOString().split('T')[0], description: 'Gas for Car' },
+                { id: 'exp4', amount: '200', category: 'Utilities', date: new Date(currentYear, currentMonth, 15).toISOString().split('T')[0], description: 'Electricity & Water' },
+                { id: 'exp5', amount: '300', category: 'Entertainment', date: new Date(currentYear, currentMonth, 20).toISOString().split('T')[0], description: 'Movies & Dining' },
+                { id: 'exp6', amount: '250', category: 'Shopping', date: new Date(currentYear, currentMonth, 25).toISOString().split('T')[0], description: 'Clothing & Electronics' }
+            );
+            
+            // Historical expense data (last 6 months)
+            for (let i = 1; i <= 5; i++) {
+                const date = new Date(currentYear, currentMonth - i, 1);
+                const monthExpenses = 2000 + Math.random() * 1000; // Random expenses between 2000-3000
+                sampleExpenses.push(
+                    { id: `exp-hist-${i}`, amount: monthExpenses.toFixed(0), category: 'Housing', date: date.toISOString().split('T')[0], description: 'Monthly Rent' }
+                );
+            }
+            
+            // Sample Savings Data
+            const sampleSavings = [
+                { id: 'sav1', goalName: 'Emergency Fund', targetAmount: '10000', savedAmount: '3500', description: 'Emergency savings' },
+                { id: 'sav2', goalName: 'Vacation Fund', targetAmount: '3000', savedAmount: '1200', description: 'Summer vacation' }
+            ];
+            
+            // Store the data
+            localStorage.setItem('income', JSON.stringify(sampleIncome));
+            localStorage.setItem('expenses', JSON.stringify(sampleExpenses));
+            localStorage.setItem('savings', JSON.stringify(sampleSavings));
+            
+            updateDebugInfo();
+            alert('Sample data added! Now you can view the new dashboard with all charts populated.');
+        }
+        
+        function clearData() {
+            localStorage.removeItem('income');
+            localStorage.removeItem('expenses');
+            localStorage.removeItem('savings');
+            updateDebugInfo();
+            alert('All data cleared!');
+        }
+        
+        // Update debug info on load
+        updateDebugInfo();
+    </script>
+</body>
+</html> 

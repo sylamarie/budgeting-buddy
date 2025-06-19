@@ -6,27 +6,22 @@
     <title>Expenses | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="expenses.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/dataManager.js"></script>
+    <script src="../js/navbar.js"></script>
+    <script defer src="../js/expenses.js"></script>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
     <!-- Navbar -->
-    <nav class="bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="#" class="text-2xl font-bold">
-                    <span class="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                        Budgeting Buddy
-                    </span>
-                </a>
-            </div>
-        </div>
-    </nav>
+    <div id="navbar"></div>
 
+    <!-- Protected Content -->
+    <div class="protected-content">
     <main class="container mx-auto px-4 py-8">
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
-            <p class="text-gray-600">Monitor and categorize your spending</p>
+                <p class="text-gray-600">Monitor and manage your expenses</p>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
@@ -37,31 +32,32 @@
                 <form id="expense-form" class="space-y-4">
                     <div>
                         <label for="amount" class="block text-sm font-medium">Amount</label>
-                        <input type="number" id="amount" step="0.01"
-                            class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                            <input type="number" id="amount" step="0.01" required
+                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
                     <div>
                         <label for="category" class="block text-sm font-medium">Category</label>
-                        <select id="category" class="mt-1 w-full border border-gray-300 rounded px-3 py-2">
+                            <select id="category" required class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Select category</option>
-                            <option>Food</option>
-                            <option>Transportation</option>
-                            <option>Rent</option>
-                            <option>Utilities</option>
-                            <option>Entertainment</option>
-                            <option>Healthcare</option>
-                            <option>Shopping</option>
-                            <option>Other</option>
+                                <option value="Food">Food & Dining</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Housing">Housing</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
                         </select>
                     </div>
 
                     <div>
                         <label for="date" class="block text-sm font-medium">Date</label>
-                        <input type="date" id="date" class="mt-1 w-full border border-gray-300 rounded px-3 py-2" />
+                            <input type="date" id="date" required class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded">
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors">
                         Add Expense
                     </button>
                 </form>
@@ -70,7 +66,7 @@
             <!-- Summary Section -->
             <div class="bg-white rounded-xl p-6 shadow">
                 <h2 class="text-xl font-bold mb-2">Expense Summary</h2>
-                <p class="text-sm text-gray-500 mb-4">Your total spending overview</p>
+                    <p class="text-sm text-gray-500 mb-4">Your total expenses overview</p>
 
                 <div class="text-center p-6 bg-red-50 rounded-lg mb-6">
                     <p class="text-sm text-red-600 font-medium mb-2">Total Expenses</p>
@@ -78,7 +74,7 @@
                 </div>
 
                 <div>
-                    <h3 class="font-semibold text-gray-900 mb-4">Recent Expenses</h3>
+                        <h3 class="font-semibold text-gray-900 mb-4">Recent Entries</h3>
                     <div id="recent-expenses" class="space-y-3"></div>
                 </div>
             </div>
@@ -91,6 +87,18 @@
             <div id="all-expenses" class="space-y-3"></div>
         </div>
     </main>
+    </div>
+
+    <!-- Login Required Message -->
+    <div class="auth-form flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Login Required</h2>
+            <p class="text-gray-600 mb-6">Please log in to access your expense tracking.</p>
+            <a href="/src/html/login.html" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors">
+                Go to Login
+            </a>
+        </div>
+    </div>
 </body>
 
 </html>

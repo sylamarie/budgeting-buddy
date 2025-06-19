@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Test - Budgeting Buddy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Budgeting Buddy - Feature Test</h1>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Authentication Test -->
+            <div class="bg-white rounded-xl p-6 shadow">
+                <h2 class="text-xl font-bold mb-4">🔐 Authentication Test</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-2">Test Steps:</h3>
+                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                            <li>Go to <a href="/src/html/register.html" class="text-blue-600 hover:underline">Register page</a></li>
+                            <li>Create a new account</li>
+                            <li>Try accessing <a href="/src/html/dashboard.html" class="text-blue-600 hover:underline">Dashboard</a> without login</li>
+                            <li>Should redirect to login page</li>
+                            <li>Login with your credentials</li>
+                            <li>Should now access all pages</li>
+                        </ol>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded">
+                        <p class="text-sm text-blue-800">
+                            <strong>Demo Account:</strong><br>
+                            Email: demo@example.com<br>
+                            Password: demo123
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Persistence Test -->
+            <div class="bg-white rounded-xl p-6 shadow">
+                <h2 class="text-xl font-bold mb-4">💾 Data Persistence Test</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-2">Test Steps:</h3>
+                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                            <li>Login to your account</li>
+                            <li>Add some income/expenses on <a href="/src/html/income.html" class="text-blue-600 hover:underline">Income</a> or <a href="/src/html/expenses.html" class="text-blue-600 hover:underline">Expenses</a> pages</li>
+                            <li>Refresh the page</li>
+                            <li>Data should still be there</li>
+                            <li>Logout and login again</li>
+                            <li>Data should persist</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Test -->
+            <div class="bg-white rounded-xl p-6 shadow">
+                <h2 class="text-xl font-bold mb-4">🗑️ Delete Confirmation Test</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-2">Test Steps:</h3>
+                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                            <li>Add some test data</li>
+                            <li>Click the delete button (trash icon)</li>
+                            <li>Should show confirmation dialog</li>
+                            <li>Click "Cancel" - item should remain</li>
+                            <li>Click "OK" - item should be deleted</li>
+                            <li>Refresh page - deleted item should not return</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Profile Test -->
+            <div class="bg-white rounded-xl p-6 shadow">
+                <h2 class="text-xl font-bold mb-4">👤 User Profile Test</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-2">Test Steps:</h3>
+                        <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                            <li>Login to your account</li>
+                            <li>Check the navbar</li>
+                            <li>Should show your name and initials</li>
+                            <li>Click logout button</li>
+                            <li>Should redirect to login page</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="mt-8 bg-white rounded-xl p-6 shadow">
+            <h2 class="text-xl font-bold mb-4">🔗 Quick Navigation</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <a href="/src/html/login.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Login</h3>
+                    <p class="text-sm text-gray-600">Sign in to your account</p>
+                </a>
+                <a href="/src/html/register.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Register</h3>
+                    <p class="text-sm text-gray-600">Create a new account</p>
+                </a>
+                <a href="/src/html/dashboard.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Dashboard</h3>
+                    <p class="text-sm text-gray-600">View your financial overview</p>
+                </a>
+                <a href="/src/html/income.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Income</h3>
+                    <p class="text-sm text-gray-600">Manage your income</p>
+                </a>
+                <a href="/src/html/expenses.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Expenses</h3>
+                    <p class="text-sm text-gray-600">Track your expenses</p>
+                </a>
+                <a href="/src/html/savings.html" class="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <h3 class="font-medium text-gray-900">Savings</h3>
+                    <p class="text-sm text-gray-600">Manage savings goals</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Current Status -->
+        <div class="mt-8 bg-white rounded-xl p-6 shadow">
+            <h2 class="text-xl font-bold mb-4">📊 Current Status</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">✅ Implemented Features:</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                        <li>User authentication (login/register)</li>
+                        <li>Protected pages (require login)</li>
+                        <li>User profile display in navbar</li>
+                        <li>Persistent data storage (localStorage)</li>
+                        <li>Delete confirmation dialogs</li>
+                        <li>Edit functionality for income/expenses</li>
+                        <li>Dashboard with real-time stats</li>
+                        <li>Logout functionality</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">🔧 Technical Details:</h3>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                        <li>Authentication system (auth.js)</li>
+                        <li>Data management system (dataManager.js)</li>
+                        <li>User-specific data storage</li>
+                        <li>Form validation and error handling</li>
+                        <li>Responsive design</li>
+                        <li>Success/error notifications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

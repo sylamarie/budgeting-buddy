@@ -1,83 +1,199 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("income-form");
-  const totalDisplay = document.getElementById("total-income");
-  const recentContainer = document.getElementById("recent-incomes");
-  const allContainer = document.getElementById("all-incomes");
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is authenticated
+    if (!auth.isUserLoggedIn()) {
+        return; // Auth system will handle the redirect
+    }
 
-  let incomes = [
-    { id: 1, amount: 3000, category: "Salary", date: "2025-06-01" },
-    { id: 2, amount: 500, category: "Bonus", date: "2025-06-15" },
-  ];
+    // Initialize data manager
+    dataManager.init();
 
-  const render = () => {
-    // Total
-    const total = incomes.reduce((sum, i) => sum + i.amount, 0);
-    totalDisplay.textContent = `$${total.toLocaleString()}`;
+    // Set default date to today
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
 
-    // Recent
-    const recent = incomes.slice(-3).reverse();
-    recentContainer.innerHTML = recent.map(renderCard).join("");
+    // Load income data
+    loadIncomeData();
 
-    // All
-    allContainer.innerHTML = incomes.map((i) => `
-      <div class="flex items-center justify-between p-4 bg-white rounded-lg border hover:shadow-md transition-shadow">
-        <div>
-          <p class="font-medium text-gray-900">${i.category}</p>
-          <p class="text-sm text-gray-500">${new Date(i.date).toLocaleDateString()}</p>
+    // Form submission
+    document.getElementById('income-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addIncome();
+    });
+});
+
+function loadIncomeData() {
+    const incomes = dataManager.getIncome();
+    updateTotalIncome(incomes);
+    displayRecentIncomes(incomes);
+    displayAllIncomes(incomes);
+}
+
+function updateTotalIncome(incomes) {
+    const total = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
+    document.getElementById('total-income').textContent = `$${total.toFixed(2)}`;
+}
+
+function displayRecentIncomes(incomes) {
+    const recentContainer = document.getElementById('recent-incomes');
+    const recentIncomes = incomes.slice(-5).reverse(); // Last 5 entries
+
+    if (recentIncomes.length === 0) {
+        recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No income entries yet.</p>';
+        return;
+    }
+
+    recentContainer.innerHTML = recentIncomes.map(income => `
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+            <div>
+                <p class="font-medium text-gray-900">$${parseFloat(income.amount).toFixed(2)}</p>
+                <p class="text-sm text-gray-600">${income.category} • ${new Date(income.date).toLocaleDateString()}</p>
+            </div>
         </div>
-        <div class="text-right">
-          <p class="text-xl font-bold text-green-600">$${i.amount.toLocaleString()}</p>
-          <button class="mt-1 text-sm text-red-500 underline" onclick="deleteIncome(${i.id})">Delete</button>
-        </div>
-      </div>
-    `).join("");
+    `).join('');
+}
+
+function displayAllIncomes(incomes) {
+    const allContainer = document.getElementById('all-incomes');
 
     if (incomes.length === 0) {
-      allContainer.innerHTML = `<div class="text-center py-8 text-gray-500">
-        No income entries yet. Add your first income above!
-      </div>`;
+        allContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No income entries yet. Add your first income above!</p>';
+        return;
     }
-  };
 
-  const renderCard = (entry) => `
-    <div class="flex items-center justify-between p-3 bg-white rounded-lg border">
-      <div>
-        <p class="font-medium">${entry.category}</p>
-        <p class="text-sm text-gray-500">${entry.date}</p>
-      </div>
-      <div class="text-right">
-        <p class="font-bold text-green-600">$${entry.amount.toLocaleString()}</p>
-      </div>
-    </div>
-  `;
+    allContainer.innerHTML = incomes.reverse().map(income => `
+        <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <span class="text-green-600 font-medium">$$</span>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">$${parseFloat(income.amount).toFixed(2)}</p>
+                        <p class="text-sm text-gray-600">${income.category}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">${new Date(income.date).toLocaleDateString()}</span>
+                <button onclick="editIncome('${income.id}')" class="text-blue-600 hover:text-blue-800 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                </button>
+                <button onclick="deleteIncome('${income.id}')" class="text-red-600 hover:text-red-800 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
-  window.deleteIncome = (id) => {
-    incomes = incomes.filter(i => i.id !== id);
-    render();
-  };
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("amount").value);
-    const category = document.getElementById("category").value;
-    const date = document.getElementById("date").value;
+async function addIncome() {
+    const amount = document.getElementById('amount').value;
+    const category = document.getElementById('category').value;
+    const date = document.getElementById('date').value;
 
     if (!amount || !category || !date) {
-      alert("Please fill in all fields.");
-      return;
+        alert('Please fill in all fields');
+        return;
     }
 
-    const newEntry = {
-      id: Date.now(),
-      amount,
-      category,
-      date,
+    try {
+        const newIncome = dataManager.addIncome(amount, category, date);
+        document.getElementById('income-form').reset();
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        loadIncomeData();
+        
+        // Show success message
+        showMessage('Income added successfully!', 'success');
+    } catch (error) {
+        showMessage('Failed to add income. Please try again.', 'error');
+    }
+}
+
+async function deleteIncome(id) {
+    try {
+        const deleted = await dataManager.deleteIncome(id);
+        if (deleted) {
+            loadIncomeData();
+            showMessage('Income deleted successfully!', 'success');
+        }
+    } catch (error) {
+        showMessage('Failed to delete income. Please try again.', 'error');
+    }
+}
+
+function editIncome(id) {
+    const incomes = dataManager.getIncome();
+    const income = incomes.find(inc => inc.id === id);
+    
+    if (!income) return;
+
+    // Populate form with existing data
+    document.getElementById('amount').value = income.amount;
+    document.getElementById('category').value = income.category;
+    document.getElementById('date').value = income.date;
+
+    // Change form button text
+    const submitBtn = document.querySelector('#income-form button[type="submit"]');
+    submitBtn.textContent = 'Update Income';
+    submitBtn.onclick = function(e) {
+        e.preventDefault();
+        updateIncome(id);
     };
 
-    incomes.push(newEntry);
-    form.reset();
-    render();
-  });
+    // Scroll to form
+    document.getElementById('income-form').scrollIntoView({ behavior: 'smooth' });
+}
 
-  render();
-});
+function updateIncome(id) {
+    const amount = document.getElementById('amount').value;
+    const category = document.getElementById('category').value;
+    const date = document.getElementById('date').value;
+
+    if (!amount || !category || !date) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    try {
+        const updatedIncome = dataManager.updateIncome(id, amount, category, date);
+        if (updatedIncome) {
+            document.getElementById('income-form').reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            
+            // Reset form button
+            const submitBtn = document.querySelector('#income-form button[type="submit"]');
+            submitBtn.textContent = 'Add Income';
+            submitBtn.onclick = function(e) {
+                e.preventDefault();
+                addIncome();
+            };
+
+            loadIncomeData();
+            showMessage('Income updated successfully!', 'success');
+        }
+    } catch (error) {
+        showMessage('Failed to update income. Please try again.', 'error');
+    }
+}
+
+function showMessage(message, type) {
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-red-100 text-red-800 border border-red-400'
+    }`;
+    messageDiv.textContent = message;
+
+    // Add to page
+    document.body.appendChild(messageDiv);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+        }
+    }, 3000);
+}

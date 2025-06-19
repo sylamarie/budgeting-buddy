@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgeting Buddy - Server Paths Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="src/js/navbar.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="navbar"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-4">Budgeting Buddy - Server Paths Test</h1>
+        <p class="text-gray-600 mb-8">This page shows all the available pages with the correct absolute paths using /src/html/ directory.</p>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Dashboard</h2>
+                <p class="text-gray-600 mb-4">Main dashboard with financial overview</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/dashboard.html</p>
+                <a href="/src/html/dashboard.html" class="text-blue-600 hover:underline">View Dashboard →</a>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Income</h2>
+                <p class="text-gray-600 mb-4">Track and manage your income sources</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/income.html</p>
+                <a href="/src/html/income.html" class="text-blue-600 hover:underline">View Income →</a>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Expenses</h2>
+                <p class="text-gray-600 mb-4">Monitor and categorize your spending</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/expenses.html</p>
+                <a href="/src/html/expenses.html" class="text-blue-600 hover:underline">View Expenses →</a>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Savings</h2>
+                <p class="text-gray-600 mb-4">Set and track your savings goals</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/savings.html</p>
+                <a href="/src/html/savings.html" class="text-blue-600 hover:underline">View Savings →</a>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Settings</h2>
+                <p class="text-gray-600 mb-4">Customize your budgeting experience</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/settings.html</p>
+                <a href="/src/html/settings.html" class="text-blue-600 hover:underline">View Settings →</a>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-xl font-semibold mb-2">Login</h2>
+                <p class="text-gray-600 mb-4">Sign in to your account</p>
+                <p class="text-sm text-gray-500 mb-2">Path: /src/html/login.html</p>
+                <a href="/src/html/login.html" class="text-blue-600 hover:underline">View Login →</a>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-green-50 rounded-lg">
+            <h3 class="font-semibold text-green-900 mb-2">✅ Fixed Double Path Issue:</h3>
+            <ul class="text-green-800 space-y-1">
+                <li>• Updated all navbar links to use absolute paths starting with /</li>
+                <li>• No more double src/html/src/html/ in URLs</li>
+                <li>• Links now work correctly from any page</li>
+                <li>• Clean URLs like /src/html/income.html</li>
+            </ul>
+        </div>
+        
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h3 class="font-semibold text-blue-900 mb-2">🧪 Testing Instructions:</h3>
+            <ol class="text-blue-800 space-y-1">
+                <li>1. Click on any page link above to test individual pages</li>
+                <li>2. Check if the navbar appears on each page</li>
+                <li>3. Test the navigation links in the navbar</li>
+                <li>4. Verify URLs show clean /src/html/ paths (no double paths)</li>
+                <li>5. Try the mobile menu on smaller screens</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html> 
