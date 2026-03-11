@@ -19,22 +19,34 @@ Budgeting Buddy is a simple web app that helps you track your income, expenses, 
 - Exchange rate API for currency conversion
 - Chart.js for spending graphs
 
+## Live Deployment
+
+- Render: `https://budgetingbuddy.onrender.com/`
+
 ## Getting Started
 
 1. Clone this repo
 2. Run `npm install`
-3. Start MongoDB locally or use a remote MongoDB connection string
-4. Set `MONGODB_URI` if you are not using the default `mongodb://127.0.0.1:27017`
+3. Use MongoDB Atlas or another MongoDB connection string
+4. Set `MONGODB_URI` and `MONGODB_DB`
 5. Run `npm start`
 6. Open `http://localhost:3000`
 
+## Environment Variables
+
+```env
+MONGODB_URI=mongodb+srv://budgetingbuddy:BudgetBuddy@budgetingbuddy.ravjf7z.mongodb.net/?appName=budgetingbuddy
+MONGODB_DB=budgetingbuddy
+PORT=3000
+```
+
 ## Notes
 
-- The server uses `MONGODB_DB=budgeting-buddy` by default.
 - Copy `.env.example` values into your shell environment if needed.
 - A demo account is created automatically on startup:
   `demo@example.com` / `demo123`
 - If PowerShell blocks `npm`, run `cmd /c npm.cmd start` instead.
+- The app is deployed on Render at `https://budgetingbuddy.onrender.com/`
 
 ## License
 
