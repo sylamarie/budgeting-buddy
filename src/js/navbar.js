@@ -44,7 +44,7 @@ function updateActivePage() {
             // Remove active class from all buttons
             const buttons = document.querySelectorAll('.nav-button');
             buttons.forEach(btn => {
-                btn.classList.remove('bg-blue-100', 'text-blue-700');
+                btn.classList.remove('bg-blue-100', 'text-blue-700', 'is-active');
                 btn.classList.add('text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-100');
             });
             
@@ -52,7 +52,7 @@ function updateActivePage() {
             const button = link.querySelector('.nav-button');
             if (button) {
                 button.classList.remove('text-gray-600', 'hover:text-gray-900', 'hover:bg-gray-100');
-                button.classList.add('bg-blue-100', 'text-blue-700');
+                button.classList.add('bg-blue-100', 'text-blue-700', 'is-active');
             }
         }
     });

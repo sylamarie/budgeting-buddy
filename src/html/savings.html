@@ -6,71 +6,85 @@
     <title>Savings Goals | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="../js/auth.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/navbar.js"></script>
+    <script defer src="../js/ui.js"></script>
     <script defer src="../js/savings.js"></script>
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body class="app-shell min-h-screen">
+    <div class="page-orb page-orb--one"></div>
+    <div class="page-orb page-orb--two"></div>
     <!-- Navbar -->
     <div id="navbar"></div>
 
-    <div class="container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Savings Goals</h1>
-            <p class="text-gray-600">Set and track your financial milestones</p>
+    <div class="container mx-auto px-4 py-8 md:py-10 content-frame">
+        <div class="hero-panel rounded-[2rem] p-8 md:p-10 mb-8 reveal">
+            <p class="eyebrow text-white/60 mb-3">Savings planner</p>
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                <div>
+                    <h1 class="hero-title text-4xl md:text-6xl mb-3">Savings Goals</h1>
+                    <p class="text-white/75 text-lg">Set milestones, track momentum, and see progress at a glance.</p>
+                </div>
+                <div class="hero-stat rounded-[1.5rem] px-5 py-4">
+                    <p class="text-sm text-white/70">Total Progress</p>
+                    <p id="total-progress-percent" class="display-title text-4xl">0%</p>
+                </div>
+            </div>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
             <!-- Add Goal Form -->
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="text-xl font-semibold mb-4">Create New Goal</h2>
+            <div class="surface-panel p-6 rounded-[1.8rem] reveal" data-delay="1">
+                <h2 class="section-heading text-3xl mb-4">Create New Goal</h2>
                 <form id="goal-form" class="space-y-4">
                     <div>
                         <label for="goalName" class="block font-medium">Goal Name</label>
-                        <input id="goalName" type="text" class="w-full mt-1 border px-3 py-2 rounded" />
+                        <input id="goalName" type="text" class="form-input mt-1" />
                     </div>
                     <div>
                         <label for="targetAmount" class="block font-medium">Target Amount</label>
-                        <input id="targetAmount" type="number" class="w-full mt-1 border px-3 py-2 rounded" />
+                        <input id="targetAmount" type="number" class="form-input mt-1" />
                     </div>
                     <div>
                         <label for="savedAmount" class="block font-medium">Saved Amount</label>
-                        <input id="savedAmount" type="number" class="w-full mt-1 border px-3 py-2 rounded" />
+                        <input id="savedAmount" type="number" class="form-input mt-1" />
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Create
+                    <button type="submit" class="primary-button w-full py-3">Create
                         Goal</button>
                 </form>
             </div>
 
             <!-- Overall Progress -->
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="text-xl font-semibold mb-4">Overall Progress</h2>
-                <div class="text-center bg-blue-50 p-4 rounded mb-6">
+            <div class="surface-panel p-6 rounded-[1.8rem] reveal" data-delay="2">
+                <h2 class="section-heading text-3xl mb-4">Overall Progress</h2>
+                <p class="text-sm text-slate-500 mb-4">Saved amounts are counted separately from income and reduce your spendable balance on the dashboard.</p>
+                <div class="text-center bg-amber-50/80 p-5 rounded-[1.5rem] border border-amber-100 mb-6">
                     <p class="text-blue-600 font-medium mb-1">Total Progress</p>
-                    <p id="total-progress-percent" class="text-3xl font-bold text-blue-700">0%</p>
-                    <div class="w-full bg-gray-200 rounded h-3 mt-2">
-                        <div id="overall-bar" class="bg-blue-500 h-3 rounded" style="width: 0%;"></div>
+                    <p id="overall-progress-percent" class="text-3xl font-bold text-amber-700">0%</p>
+                    <div class="w-full bg-white rounded-full h-3 mt-3 overflow-hidden">
+                        <div id="overall-bar" class="bg-gradient-to-r from-amber-500 to-teal-500 h-3 rounded-full transition-all duration-500" style="width: 0%;"></div>
                     </div>
                     <p id="total-progress-text" class="text-sm text-gray-600 mt-2">$0 of $0</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="bg-green-50 p-3 rounded">
+                    <div class="bg-emerald-50/80 p-4 rounded-[1.3rem] border border-emerald-100">
                         <p class="text-green-600 text-sm font-medium">Total Saved</p>
                         <p id="total-saved" class="text-xl font-bold text-green-700">$0</p>
                     </div>
-                    <div class="bg-purple-50 p-3 rounded">
-                        <p class="text-purple-600 text-sm font-medium">Active Goals</p>
-                        <p id="active-goals" class="text-xl font-bold text-purple-700">0</p>
+                    <div class="bg-slate-100/80 p-4 rounded-[1.3rem] border border-slate-200">
+                        <p class="text-slate-600 text-sm font-medium">Active Goals</p>
+                        <p id="active-goals" class="text-xl font-bold text-slate-800">0</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Savings List -->
-        <div class="bg-white p-6 mt-8 rounded-xl shadow">
-            <h2 class="text-xl font-semibold mb-4">Your Savings Goals</h2>
+        <div class="surface-panel p-6 mt-8 rounded-[1.8rem] reveal">
+            <h2 class="section-heading text-3xl mb-4">Your Savings Goals</h2>
             <div id="goals-list" class="space-y-6"></div>
             <div id="empty-message" class="text-center text-gray-500 py-12 hidden">
                 <p class="text-lg font-medium mb-2">No savings goals yet</p>
@@ -80,18 +94,18 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+    <div id="profile-modal" class="fixed inset-0 bg-slate-950/45 flex items-center justify-center z-50 hidden">
+        <div class="modal-panel rounded-[1.8rem] p-8 w-full max-w-md relative">
             <button id="close-profile-modal"
                 class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <h2 class="section-heading text-3xl mb-4">Profile Information</h2>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Name</label>
-                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-name" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Email</label>
-                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-email" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
         </div>
     </div>

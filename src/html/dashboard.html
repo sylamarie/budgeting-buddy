@@ -6,80 +6,76 @@
     <title>Dashboard | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/navbar.js"></script>
+    <script defer src="../js/ui.js"></script>
     <script defer src="../js/dashboard.js"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="app-shell text-gray-800">
+    <div class="page-orb page-orb--one"></div>
+    <div class="page-orb page-orb--two"></div>
     <!-- Navbar -->
     <div id="navbar"></div>
 
     <!-- Protected Content -->
-    <div class="protected-content">
-        <main class="container mx-auto px-4 py-8">
+    <div class="protected-content content-frame">
+        <main class="container mx-auto px-4 py-8 md:py-10">
             <!-- Header Section -->
-            <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl p-8 mb-8 text-white">
-                <div class="flex justify-between items-center">
+            <div class="hero-panel rounded-[2rem] p-8 md:p-10 mb-8 reveal">
+                <div class="flex justify-between items-center gap-6 flex-col md:flex-row">
                     <div>
-                        <h1 class="text-4xl font-bold mb-2">Take Control of Your Money</h1>
-                        <p class="text-blue-100 text-lg">Your financial journey starts here</p>
+                        <p class="eyebrow text-white/60 mb-3">Dashboard overview</p>
+                        <h1 class="hero-title text-4xl md:text-6xl mb-3">Take control of your money</h1>
+                        <p class="text-white/75 text-lg">Your financial journey starts here</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-blue-100 text-sm">Current Balance</p>
-                        <p id="current-balance" class="text-3xl font-bold">$0</p>
+                    <div class="hero-stat rounded-[1.6rem] px-6 py-5 text-right min-w-[220px]">
+                        <p class="text-white/60 text-sm">Spendable Balance</p>
+                        <p id="current-balance" class="display-title text-4xl">$0</p>
                     </div>
                 </div>
             </div>
 
             <!-- Summary Cards -->
+            <div class="mb-3 reveal">
+                <p class="eyebrow text-slate-500">Overall totals</p>
+            </div>
             <div class="grid md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl p-6 shadow">
+                <div class="metric-card reveal" data-delay="1">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
-                                </path>
-                            </svg>
+                        <div class="metric-icon metric-icon--income w-14 h-14 flex items-center justify-center">
+                            <img src="/assets/icons/income.svg" alt="Income icon" class="w-7 h-7 object-contain" />
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Total Income</p>
-                            <p id="total-income" class="text-2xl font-bold text-gray-900">$0</p>
+                            <p class="text-sm font-medium text-slate-500">Lifetime Income</p>
+                            <p id="total-income" class="text-2xl font-bold text-slate-900">$0</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl p-6 shadow">
+                <div class="metric-card reveal" data-delay="2">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                                </path>
-                            </svg>
+                        <div class="metric-icon metric-icon--expense w-14 h-14 flex items-center justify-center">
+                            <img src="/assets/icons/expense.svg" alt="Expense icon" class="w-7 h-7 object-contain" />
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Total Expenses</p>
-                            <p id="total-expenses" class="text-2xl font-bold text-gray-900">$0</p>
+                            <p class="text-sm font-medium text-slate-500">Lifetime Expenses</p>
+                            <p id="total-expenses" class="text-2xl font-bold text-slate-900">$0</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl p-6 shadow">
+                <div class="metric-card reveal" data-delay="3">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
-                                </path>
-                            </svg>
+                        <div class="metric-icon metric-icon--savings w-14 h-14 flex items-center justify-center">
+                            <img src="/assets/icons/savings.svg" alt="Savings icon" class="w-7 h-7 object-contain" />
                         </div>
                         <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600">Savings Progress</p>
-                            <p id="savings-progress" class="text-2xl font-bold text-gray-900">$0</p>
+                            <p class="text-sm font-medium text-slate-500">Total Saved</p>
+                            <p id="savings-progress" class="text-2xl font-bold text-slate-900">$0</p>
                         </div>
                     </div>
                 </div>
@@ -88,16 +84,16 @@
             <!-- Charts Section -->
             <div class="grid lg:grid-cols-2 gap-8 mb-8">
                 <!-- Spending by Category Pie Chart -->
-                <div class="bg-white rounded-xl p-6 shadow">
-                    <h2 class="text-xl font-bold mb-4">Spending by Category</h2>
+                <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="1">
+                    <h2 class="section-heading text-2xl mb-4">Spending by Category</h2>
                     <div class="relative" style="height: 350px;">
                         <canvas id="expenses-chart"></canvas>
                     </div>
                 </div>
 
                 <!-- Monthly Overview Bar Chart -->
-                <div class="bg-white rounded-xl p-6 shadow">
-                    <h2 class="text-xl font-bold mb-4">Monthly Overview</h2>
+                <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="2">
+                    <h2 class="section-heading text-2xl mb-4">Monthly Overview and Savings</h2>
                     <div class="relative" style="height: 350px;">
                         <canvas id="monthly-overview-chart"></canvas>
                     </div>
@@ -105,20 +101,25 @@
             </div>
 
             <!-- Final Summary -->
-            <div class="bg-white rounded-xl p-6 shadow">
-                <h2 class="text-xl font-bold mb-6">Monthly Summary</h2>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="text-center p-4 bg-green-50 rounded-lg">
+            <div class="surface-panel rounded-[1.8rem] p-6 reveal">
+                <h2 class="section-heading text-2xl mb-2">Monthly Balance Breakdown</h2>
+                <p class="text-sm text-slate-500 mb-6">Monthly spendable balance is calculated as this month's income minus this month's expenses minus savings updated this month.</p>
+                <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div class="text-center p-5 bg-emerald-50/80 rounded-[1.4rem] border border-emerald-100">
                         <p class="text-sm font-medium text-gray-600">Monthly Income</p>
                         <p id="monthly-income" class="text-2xl font-bold text-green-600">$0</p>
                     </div>
-                    <div class="text-center p-4 bg-red-50 rounded-lg">
+                    <div class="text-center p-5 bg-rose-50/80 rounded-[1.4rem] border border-rose-100">
                         <p class="text-sm font-medium text-gray-600">Monthly Expenses</p>
                         <p id="monthly-expenses" class="text-2xl font-bold text-red-600">$0</p>
                     </div>
-                    <div class="text-center p-4 bg-blue-50 rounded-lg">
-                        <p class="text-sm font-medium text-gray-600">Net Balance</p>
-                        <p id="net-balance" class="text-2xl font-bold text-blue-600">$0</p>
+                    <div class="text-center p-5 bg-sky-50/80 rounded-[1.4rem] border border-sky-100">
+                        <p class="text-sm font-medium text-gray-600">Monthly Saved</p>
+                        <p id="total-saved-summary" class="text-2xl font-bold text-sky-700">$0</p>
+                    </div>
+                    <div class="text-center p-5 bg-amber-50/80 rounded-[1.4rem] border border-amber-100">
+                        <p class="text-sm font-medium text-gray-600">Monthly Spendable</p>
+                        <p id="net-balance" class="text-2xl font-bold text-amber-700">$0</p>
                     </div>
                 </div>
             </div>
@@ -126,18 +127,18 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+    <div id="profile-modal" class="fixed inset-0 bg-slate-950/45 flex items-center justify-center z-50 hidden">
+        <div class="modal-panel rounded-[1.8rem] p-8 w-full max-w-md relative">
             <button id="close-profile-modal"
                 class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <h2 class="section-heading text-3xl mb-4">Profile Information</h2>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Name</label>
-                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-name" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Email</label>
-                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-email" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
         </div>
     </div>

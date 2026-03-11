@@ -1,4 +1,3 @@
-// Data Management System
 class DataManager {
     constructor() {
         this.currentUser = null;
@@ -6,82 +5,109 @@ class DataManager {
     }
 
     init() {
-        // Get current user from auth
         const userData = localStorage.getItem('userData');
         if (userData) {
             this.currentUser = JSON.parse(userData);
         }
     }
 
-    // Generic data operations
-    getData(type) {
-        if (!this.currentUser) return [];
-        const key = `${this.currentUser.id}_${type}`;
-        return JSON.parse(localStorage.getItem(key) || '[]');
+    requireUser() {
+        this.init();
+        if (!this.currentUser?.id) {
+            throw new Error('You must be logged in to access data.');
+        }
+
+        return this.currentUser.id;
     }
 
-    saveData(type, data) {
-        if (!this.currentUser) return false;
-        const key = `${this.currentUser.id}_${type}`;
-        localStorage.setItem(key, JSON.stringify(data));
+    async getData(type) {
+        const userId = this.requireUser();
+        const payload = await window.apiRequest(`/api/users/${userId}/${type}`);
+        if (type === 'settings') {
+            this.cacheSettings(payload.items || []);
+        }
+        return payload.items || [];
+    }
+
+    async saveData(type, data) {
+        const userId = this.requireUser();
+        const payload = await window.apiRequest(`/api/users/${userId}/${type}`, {
+            method: 'PUT',
+            body: JSON.stringify({ items: data })
+        });
+
+        if (type === 'settings') {
+            this.cacheSettings(payload.items || []);
+        }
+
+        return payload.items || [];
+    }
+
+    async addItem(type, item) {
+        const userId = this.requireUser();
+        const payload = await window.apiRequest(`/api/users/${userId}/${type}`, {
+            method: 'POST',
+            body: JSON.stringify(item)
+        });
+
+        if (type === 'settings') {
+            const settings = [...this.getCachedSettings(), payload.item];
+            this.cacheSettings(settings);
+        }
+
+        return payload.item;
+    }
+
+    async updateItem(type, id, updates) {
+        const userId = this.requireUser();
+        const payload = await window.apiRequest(`/api/users/${userId}/${type}/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(updates)
+        });
+
+        if (type === 'settings') {
+            const settings = this.getCachedSettings().map((item) => item.id === id ? payload.item : item);
+            this.cacheSettings(settings);
+        }
+
+        return payload.item;
+    }
+
+    async deleteItem(type, id) {
+        const data = await this.getData(type);
+        const item = data.find((entry) => entry.id === id);
+
+        if (!item) {
+            return false;
+        }
+
+        const confirmed = await window.appUI.confirm(this.getItemDescription(type, item), {
+            title: `Delete ${this.getSingularTypeLabel(type)}`,
+            confirmLabel: 'Delete',
+            cancelLabel: 'Cancel',
+            tone: 'danger'
+        });
+        if (!confirmed) {
+            return false;
+        }
+
+        const userId = this.requireUser();
+        await window.apiRequest(`/api/users/${userId}/${type}/${id}`, {
+            method: 'DELETE'
+        });
         return true;
     }
 
-    addItem(type, item) {
-        const data = this.getData(type);
-        const newItem = {
-            id: Date.now().toString(),
-            ...item,
-            createdAt: new Date().toISOString(),
-            userId: this.currentUser.id
-        };
-        data.push(newItem);
-        this.saveData(type, data);
-        return newItem;
-    }
-
-    updateItem(type, id, updates) {
-        const data = this.getData(type);
-        const index = data.findIndex(item => item.id === id);
-        if (index !== -1) {
-            data[index] = { ...data[index], ...updates, updatedAt: new Date().toISOString() };
-            this.saveData(type, data);
-            return data[index];
-        }
-        return null;
-    }
-
-    deleteItem(type, id) {
-        return new Promise((resolve) => {
-            const data = this.getData(type);
-            const item = data.find(item => item.id === id);
-            
-            if (!item) {
-                resolve(false);
-                return;
-            }
-
-            // Show confirmation dialog
-            const confirmed = confirm(`Are you sure you want to delete this ${type.slice(0, -1)}?\n\n${this.getItemDescription(type, item)}`);
-            
-            if (confirmed) {
-                const filteredData = data.filter(item => item.id !== id);
-                this.saveData(type, filteredData);
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-    }
-
     getItemDescription(type, item) {
+        const amount = (value) => window.appUI.formatCurrency(value);
+
         switch (type) {
             case 'income':
-                return `Amount: $${item.amount} | Category: ${item.category} | Date: ${new Date(item.date).toLocaleDateString()}`;
+                return `Amount: ${amount(item.amount)}\nCategory: ${item.category}\nDate: ${new Date(item.date).toLocaleDateString()}`;
             case 'expenses':
-                return `Amount: $${item.amount} | Category: ${item.category} | Date: ${new Date(item.date).toLocaleDateString()}`;
+                return `Amount: ${amount(item.amount)}\nCategory: ${item.category}\nDate: ${new Date(item.date).toLocaleDateString()}`;
             case 'savings':
-                return `Goal: ${item.goalName} | Target: $${item.targetAmount} | Saved: $${item.savedAmount}`;
+                return `Goal: ${item.goalName}\nTarget: ${amount(item.targetAmount)}\nSaved: ${amount(item.savedAmount)}`;
             case 'settings':
                 return `Setting: ${item.settingName}`;
             default:
@@ -89,129 +115,146 @@ class DataManager {
         }
     }
 
-    // Income specific methods
-    getIncome() {
+    getSingularTypeLabel(type) {
+        const labels = {
+            income: 'income entry',
+            expenses: 'expense entry',
+            savings: 'savings goal',
+            settings: 'setting'
+        };
+
+        return labels[type] || 'item';
+    }
+
+    async getIncome() {
         return this.getData('income');
     }
 
-    addIncome(amount, category, date) {
+    async addIncome(amount, category, date) {
         return this.addItem('income', { amount, category, date });
     }
 
-    updateIncome(id, amount, category, date) {
+    async updateIncome(id, amount, category, date) {
         return this.updateItem('income', id, { amount, category, date });
     }
 
-    deleteIncome(id) {
+    async deleteIncome(id) {
         return this.deleteItem('income', id);
     }
 
-    // Expenses specific methods
-    getExpenses() {
+    async getExpenses() {
         return this.getData('expenses');
     }
 
-    addExpense(amount, category, date) {
+    async addExpense(amount, category, date) {
         return this.addItem('expenses', { amount, category, date });
     }
 
-    updateExpense(id, amount, category, date) {
+    async updateExpense(id, amount, category, date) {
         return this.updateItem('expenses', id, { amount, category, date });
     }
 
-    deleteExpense(id) {
+    async deleteExpense(id) {
         return this.deleteItem('expenses', id);
     }
 
-    // Savings specific methods
-    getSavings() {
+    async getSavings() {
         return this.getData('savings');
     }
 
-    addSavingsGoal(goalName, targetAmount, savedAmount = 0) {
+    async addSavingsGoal(goalName, targetAmount, savedAmount = 0) {
         return this.addItem('savings', { goalName, targetAmount, savedAmount });
     }
 
-    updateSavingsGoal(id, goalName, targetAmount, savedAmount) {
+    async updateSavingsGoal(id, goalName, targetAmount, savedAmount) {
         return this.updateItem('savings', id, { goalName, targetAmount, savedAmount });
     }
 
-    deleteSavingsGoal(id) {
+    async deleteSavingsGoal(id) {
         return this.deleteItem('savings', id);
     }
 
-    // Settings specific methods
-    getSettings() {
+    async getSettings() {
         return this.getData('settings');
     }
 
-    saveSetting(settingName, value) {
-        const settings = this.getSettings();
-        const existingIndex = settings.findIndex(s => s.settingName === settingName);
-        
-        if (existingIndex !== -1) {
-            settings[existingIndex].value = value;
+    async saveSetting(settingName, value) {
+        const settings = await this.getSettings();
+        const existing = settings.find((entry) => entry.settingName === settingName);
+
+        if (existing) {
+            await this.updateItem('settings', existing.id, { settingName, value });
         } else {
-            settings.push({ settingName, value });
+            await this.addItem('settings', { settingName, value });
         }
-        
-        this.saveData('settings', settings);
+
         return true;
     }
 
-    getSetting(settingName, defaultValue = null) {
-        const settings = this.getSettings();
-        const setting = settings.find(s => s.settingName === settingName);
+    async getSetting(settingName, defaultValue = null) {
+        let settings = this.getCachedSettings();
+        if (settings.length === 0) {
+            settings = await this.getSettings();
+        }
+        const setting = settings.find((entry) => entry.settingName === settingName);
         return setting ? setting.value : defaultValue;
     }
 
-    // Dashboard calculations
-    getDashboardStats() {
-        const income = this.getIncome();
-        const expenses = this.getExpenses();
-        const savings = this.getSavings();
+    async getDashboardStats() {
+        const income = await this.getIncome();
+        const expenses = await this.getExpenses();
+        const savings = await this.getSavings();
 
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
 
         const monthlyIncome = income
-            .filter(item => {
+            .filter((item) => {
                 const itemDate = new Date(item.date);
                 return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
             })
             .reduce((sum, item) => sum + parseFloat(item.amount), 0);
 
         const monthlyExpenses = expenses
-            .filter(item => {
+            .filter((item) => {
                 const itemDate = new Date(item.date);
                 return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
             })
             .reduce((sum, item) => sum + parseFloat(item.amount), 0);
 
+        const monthlySavings = savings
+            .filter((goal) => {
+                const itemDate = new Date(goal.updatedAt || goal.createdAt || new Date());
+                return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+            })
+            .reduce((sum, goal) => sum + parseFloat(goal.savedAmount), 0);
+
+        const totalIncome = income.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+        const totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
         const totalSavings = savings.reduce((sum, goal) => sum + parseFloat(goal.savedAmount), 0);
         const totalTarget = savings.reduce((sum, goal) => sum + parseFloat(goal.targetAmount), 0);
         const savingsProgress = totalTarget > 0 ? (totalSavings / totalTarget) * 100 : 0;
+        const spendableBalance = totalIncome - totalExpenses - totalSavings;
+        const monthlySpendableBalance = monthlyIncome - monthlyExpenses - monthlySavings;
 
         return {
+            totalIncome,
+            totalExpenses,
             monthlyIncome,
             monthlyExpenses,
-            balance: monthlyIncome - monthlyExpenses,
+            monthlySavings,
             totalSavings,
             totalTarget,
-            savingsProgress
+            savingsProgress,
+            spendableBalance,
+            monthlySpendableBalance
         };
     }
 
-    // Export/Import functionality
-    exportData() {
-        const data = {
-            income: this.getIncome(),
-            expenses: this.getExpenses(),
-            savings: this.getSavings(),
-            settings: this.getSettings(),
-            exportDate: new Date().toISOString()
-        };
-        
+    async exportData() {
+        const userId = this.requireUser();
+        const data = await window.apiRequest(`/api/users/${userId}/export`);
+
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -221,13 +264,15 @@ class DataManager {
         URL.revokeObjectURL(url);
     }
 
-    importData(jsonData) {
+    async importData(jsonData) {
         try {
             const data = JSON.parse(jsonData);
-            if (data.income) this.saveData('income', data.income);
-            if (data.expenses) this.saveData('expenses', data.expenses);
-            if (data.savings) this.saveData('savings', data.savings);
-            if (data.settings) this.saveData('settings', data.settings);
+            await Promise.all([
+                this.saveData('income', data.income || []),
+                this.saveData('expenses', data.expenses || []),
+                this.saveData('savings', data.savings || []),
+                this.saveData('settings', data.settings || [])
+            ]);
             return true;
         } catch (error) {
             console.error('Import failed:', error);
@@ -235,24 +280,42 @@ class DataManager {
         }
     }
 
-    // Clear all data
-    clearAllData() {
-        return new Promise((resolve) => {
-            const confirmed = confirm('Are you sure you want to clear ALL your data? This action cannot be undone.');
-            
-            if (confirmed) {
-                const keys = ['income', 'expenses', 'savings', 'settings'];
-                keys.forEach(key => {
-                    const dataKey = `${this.currentUser.id}_${key}`;
-                    localStorage.removeItem(dataKey);
-                });
-                resolve(true);
-            } else {
-                resolve(false);
-            }
+    async clearAllData() {
+        const confirmed = await window.appUI.confirm('Are you sure you want to clear all your data? This action cannot be undone.', {
+            title: 'Clear all data',
+            confirmLabel: 'Clear data',
+            cancelLabel: 'Cancel',
+            tone: 'danger'
         });
+        if (!confirmed) {
+            return false;
+        }
+
+        const userId = this.requireUser();
+        await window.apiRequest(`/api/users/${userId}/data`, {
+            method: 'DELETE'
+        });
+        localStorage.removeItem('appSettings');
+        localStorage.removeItem('cachedSettings');
+        return true;
+    }
+
+    getCachedSettings() {
+        try {
+            return JSON.parse(localStorage.getItem('cachedSettings') || '[]');
+        } catch (error) {
+            return [];
+        }
+    }
+
+    cacheSettings(settings) {
+        localStorage.setItem('cachedSettings', JSON.stringify(settings));
+        const settingMap = settings.reduce((acc, setting) => {
+            acc[setting.settingName] = setting.value;
+            return acc;
+        }, {});
+        localStorage.setItem('appSettings', JSON.stringify(settingMap));
     }
 }
 
-// Initialize data manager
-const dataManager = new DataManager(); 
+const dataManager = new DataManager();

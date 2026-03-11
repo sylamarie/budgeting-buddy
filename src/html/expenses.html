@@ -6,65 +6,77 @@
     <title>Expenses | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="../js/auth.js"></script>
     <script src="../js/dataManager.js"></script>
     <script src="../js/navbar.js"></script>
+    <script defer src="../js/ui.js"></script>
     <script defer src="../js/expenses.js"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body class="app-shell text-gray-800">
+    <div class="page-orb page-orb--one"></div>
+    <div class="page-orb page-orb--two"></div>
     <!-- Navbar -->
     <div id="navbar"></div>
 
     <!-- Protected Content -->
-    <div class="protected-content">
-        <main class="container mx-auto px-4 py-8">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Expense Tracking</h1>
-                <p class="text-gray-600">Monitor and manage your expenses</p>
+    <div class="protected-content content-frame">
+        <main class="container mx-auto px-4 py-8 md:py-10">
+            <div class="hero-panel rounded-[2rem] p-8 md:p-10 mb-8 reveal">
+                <p class="eyebrow text-white/60 mb-3">Expense tracker</p>
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                    <div>
+                        <h1 class="hero-title text-4xl md:text-6xl mb-3">Expense Tracking</h1>
+                        <p class="text-white/75 text-lg">Monitor spending patterns and keep your outflow visible.</p>
+                    </div>
+                    <div class="hero-stat rounded-[1.5rem] px-5 py-4">
+                        <p class="text-sm text-white/70">Current total</p>
+                        <p id="total-expenses" class="display-title text-4xl">$0</p>
+                    </div>
+                </div>
             </div>
 
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Add Expense Form -->
-                <div class="bg-white rounded-xl p-6 shadow">
-                    <h2 class="text-xl font-bold mb-2">Add New Expense</h2>
+                <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="1">
+                    <h2 class="section-heading text-3xl mb-2">Add New Expense</h2>
                     <p class="text-sm text-gray-500 mb-4">Record a new expense entry</p>
                     <form id="expense-form" class="space-y-4">
                         <div>
-                            <label for="amount" class="block text-sm font-medium">Amount</label>
+                            <label for="amount" class="block text-sm font-medium mb-1">Amount</label>
                             <input type="number" id="amount" step="0.01" required
-                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                class="form-input" />
                         </div>
 
                         <div>
-                            <label for="category" class="block text-sm font-medium">Category</label>
+                            <label for="category" class="block text-sm font-medium mb-1">Category</label>
                             <select id="category" required
-                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="form-select">
                                 <option value="">Select category</option>
                             </select>
                         </div>
 
                         <div>
-                            <label for="date" class="block text-sm font-medium">Date</label>
+                            <label for="date" class="block text-sm font-medium mb-1">Date</label>
                             <input type="date" id="date" required
-                                class="mt-1 w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                class="form-input" />
                         </div>
 
-                        <button type="submit"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors">
+                        <button type="submit" class="danger-button w-full py-3">
                             Add Expense
                         </button>
                     </form>
                 </div>
 
                 <!-- Summary Section -->
-                <div class="bg-white rounded-xl p-6 shadow">
-                    <h2 class="text-xl font-bold mb-2">Expense Summary</h2>
+                <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="2">
+                    <h2 class="section-heading text-3xl mb-2">Expense Summary</h2>
                     <p class="text-sm text-gray-500 mb-4">Your total expenses overview</p>
 
-                    <div class="text-center p-6 bg-red-50 rounded-lg mb-6">
+                    <div class="text-center p-6 bg-rose-50/80 rounded-[1.5rem] border border-rose-100 mb-6">
                         <p class="text-sm text-red-600 font-medium mb-2">Total Expenses</p>
-                        <p id="total-expenses" class="text-4xl font-bold text-red-700">$0</p>
+                        <p id="expenses-summary-total" class="text-4xl font-bold text-red-700">$0</p>
                     </div>
 
                     <div>
@@ -75,8 +87,8 @@
             </div>
 
             <!-- Full Expense List -->
-            <div class="bg-white rounded-xl p-6 shadow mt-8">
-                <h2 class="text-xl font-bold mb-2">All Expense Entries</h2>
+            <div class="surface-panel rounded-[1.8rem] p-6 mt-8 reveal">
+                <h2 class="section-heading text-3xl mb-2">All Expense Entries</h2>
                 <p class="text-sm text-gray-500 mb-4">Complete list of your expense records</p>
                 <div id="all-expenses" class="space-y-3"></div>
             </div>
@@ -84,18 +96,18 @@
     </div>
 
     <!-- Profile Modal -->
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+    <div id="profile-modal" class="fixed inset-0 bg-slate-950/45 flex items-center justify-center z-50 hidden">
+        <div class="modal-panel rounded-[1.8rem] p-8 w-full max-w-md relative">
             <button id="close-profile-modal"
                 class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
-            <h2 class="text-2xl font-bold mb-4">Profile Information</h2>
+            <h2 class="section-heading text-3xl mb-4">Profile Information</h2>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Name</label>
-                <div id="profile-name" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-name" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 font-medium mb-1">Email</label>
-                <div id="profile-email" class="p-2 bg-gray-100 rounded"></div>
+                <div id="profile-email" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
         </div>
     </div>

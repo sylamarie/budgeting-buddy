@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 errorMessage.classList.add('hidden');
             }, 5000);
         } else {
-            alert(message);
+            window.appUI.alert(message, { title: 'Registration failed', tone: 'danger' });
         }
     }
 });  

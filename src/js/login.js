@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         errorMessage.classList.add('hidden');
       }, 5000);
     } else {
-      alert(message);
+      window.appUI.alert(message, { title: 'Login failed', tone: 'danger' });
     }
   }
 });

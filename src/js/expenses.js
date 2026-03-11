@@ -1,29 +1,22 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is authenticated
+document.addEventListener('DOMContentLoaded', async function() {
     if (!auth.isUserLoggedIn()) {
-        return; // Auth system will handle the redirect
+        return;
     }
 
-    // Initialize data manager
     dataManager.init();
-
-    // Set default date to today
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
 
-    // Load expense data
-    loadExpenseData();
+    await loadExpenseData();
+    await populateCategoryDropdown();
 
-    // Form submission
     document.getElementById('expense-form').addEventListener('submit', function(e) {
         e.preventDefault();
         addExpense();
     });
-
-    populateCategoryDropdown();
 });
 
-function loadExpenseData() {
-    const expenses = dataManager.getExpenses();
+async function loadExpenseData() {
+    const expenses = await dataManager.getExpenses();
     updateTotalExpenses(expenses);
     displayRecentExpenses(expenses);
     displayAllExpenses(expenses);
@@ -31,23 +24,29 @@ function loadExpenseData() {
 
 function updateTotalExpenses(expenses) {
     const total = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-    document.getElementById('total-expenses').textContent = `${getCurrencySymbol()}${formatAmount(total)}`;
+    const formattedTotal = `${getCurrencySymbol()}${formatAmount(total)}`;
+    document.getElementById('total-expenses').textContent = formattedTotal;
+
+    const summaryTotal = document.getElementById('expenses-summary-total');
+    if (summaryTotal) {
+        summaryTotal.textContent = formattedTotal;
+    }
 }
 
 function displayRecentExpenses(expenses) {
     const recentContainer = document.getElementById('recent-expenses');
-    const recentExpenses = expenses.slice(-5).reverse(); // Last 5 entries
+    const recentExpenses = [...expenses].slice(-5).reverse();
 
     if (recentExpenses.length === 0) {
         recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No expense entries yet.</p>';
         return;
     }
 
-    recentContainer.innerHTML = recentExpenses.map(expense => `
-        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+    recentContainer.innerHTML = recentExpenses.map((expense) => `
+        <div class="list-card flex justify-between items-center">
             <div>
-                <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
-                <p class="text-sm text-gray-600">${expense.category} • ${new Date(expense.date).toLocaleDateString()}</p>
+                <p class="font-semibold text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
+                <p class="text-sm text-gray-600">${expense.category} | ${new Date(expense.date).toLocaleDateString()}</p>
             </div>
         </div>
     `).join('');
@@ -61,12 +60,12 @@ function displayAllExpenses(expenses) {
         return;
     }
 
-    allContainer.innerHTML = expenses.reverse().map(expense => `
-        <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+    allContainer.innerHTML = [...expenses].reverse().map((expense) => `
+        <div class="list-card flex justify-between items-center gap-4">
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <span class="text-red-600 font-medium">${getCurrencySymbol()}</span>
+                    <div class="metric-icon metric-icon--expense w-10 h-10 rounded-full flex items-center justify-center">
+                        <span class="text-white font-medium">${getCurrencySymbol()}</span>
                     </div>
                     <div>
                         <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
@@ -97,20 +96,20 @@ async function addExpense() {
     const date = document.getElementById('date').value;
 
     if (!amount || !category || !date) {
-        alert('Please fill in all fields');
+        await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        const newExpense = dataManager.addExpense(amount, category, date);
+        await dataManager.addExpense(amount, category, date);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        loadExpenseData();
-        populateCategoryDropdown();
-        // Show success message
+        resetExpenseSubmitButton();
+        await loadExpenseData();
+        await populateCategoryDropdown();
         showMessage('Expense added successfully!', 'success');
     } catch (error) {
-        showMessage('Failed to add expense. Please try again.', 'error');
+        showMessage(error.message || 'Failed to add expense. Please try again.', 'error');
     }
 }
 
@@ -118,27 +117,25 @@ async function deleteExpense(id) {
     try {
         const deleted = await dataManager.deleteExpense(id);
         if (deleted) {
-            loadExpenseData();
-            populateCategoryDropdown();
+            await loadExpenseData();
+            await populateCategoryDropdown();
             showMessage('Expense deleted successfully!', 'success');
         }
     } catch (error) {
-        showMessage('Failed to delete expense. Please try again.', 'error');
+        showMessage(error.message || 'Failed to delete expense. Please try again.', 'error');
     }
 }
 
-function editExpense(id) {
-    const expenses = dataManager.getExpenses();
-    const expense = expenses.find(exp => exp.id === id);
-    
+async function editExpense(id) {
+    const expenses = await dataManager.getExpenses();
+    const expense = expenses.find((entry) => entry.id === id);
+
     if (!expense) return;
 
-    // Populate form with existing data
     document.getElementById('amount').value = expense.amount;
     document.getElementById('category').value = expense.category;
     document.getElementById('date').value = expense.date;
 
-    // Change form button text
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Update Expense';
     submitBtn.onclick = function(e) {
@@ -146,88 +143,62 @@ function editExpense(id) {
         updateExpense(id);
     };
 
-    // Scroll to form
     document.getElementById('expense-form').scrollIntoView({ behavior: 'smooth' });
-
-    populateCategoryDropdown();
 }
 
-function updateExpense(id) {
+async function updateExpense(id) {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
 
     if (!amount || !category || !date) {
-        alert('Please fill in all fields');
+        await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        const updatedExpense = dataManager.updateExpense(id, amount, category, date);
-        if (updatedExpense) {
-            document.getElementById('expense-form').reset();
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            
-            // Reset form button
-            const submitBtn = document.querySelector('#expense-form button[type="submit"]');
-            submitBtn.textContent = 'Add Expense';
-            submitBtn.onclick = function(e) {
-                e.preventDefault();
-                addExpense();
-            };
-
-            loadExpenseData();
-            populateCategoryDropdown();
-            showMessage('Expense updated successfully!', 'success');
-        }
+        await dataManager.updateExpense(id, amount, category, date);
+        document.getElementById('expense-form').reset();
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        resetExpenseSubmitButton();
+        await loadExpenseData();
+        await populateCategoryDropdown();
+        showMessage('Expense updated successfully!', 'success');
     } catch (error) {
-        showMessage('Failed to update expense. Please try again.', 'error');
+        showMessage(error.message || 'Failed to update expense. Please try again.', 'error');
     }
+}
+
+function resetExpenseSubmitButton() {
+    const submitBtn = document.querySelector('#expense-form button[type="submit"]');
+    submitBtn.textContent = 'Add Expense';
+    submitBtn.onclick = null;
 }
 
 function showMessage(message, type) {
-    // Create message element
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-red-100 text-red-800 border border-red-400'
-    }`;
-    messageDiv.textContent = message;
-
-    // Add to page
-    document.body.appendChild(messageDiv);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.parentNode.removeChild(messageDiv);
-        }
-    }, 3000);
+    window.appUI.toast(message, type === 'success' ? 'success' : 'error');
 }
 
 function getCurrencySymbol() {
-    if (typeof dataManager !== 'undefined') {
-        const c = dataManager.getSetting('currency', 'USD');
-        const map = {USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', PHP: '₱', SGD: 'S$', CNY: '¥', KRW: '₩', INR: '₹'};
-        return map[c] || '$';
-    }
-    return '$';
+    const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+    const currency = appSettings.currency || 'USD';
+    const map = { USD: '$', EUR: '\u20AC', GBP: '\u00A3', CAD: 'C$', AUD: 'A$', JPY: '\u00A5', PHP: '\u20B1', SGD: 'S$', CNY: '\u00A5', KRW: '\u20A9', INR: '\u20B9' };
+    return map[currency] || '$';
 }
 
-window.addEventListener('currencyChanged', () => {
-  renderExpenses();
-});
-
-function populateCategoryDropdown() {
+async function populateCategoryDropdown() {
     let categories = [];
     if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
-        categories = dataManager.getSetting('categories', [
+        categories = await dataManager.getSetting('categories', [
             'Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Education', 'Other'
         ]);
     }
+
     const categorySelect = document.getElementById('category');
     if (!categorySelect) return;
+
     categorySelect.innerHTML = '<option value="">Select category</option>';
-    categories.forEach(cat => {
+    categories.forEach((cat) => {
         const opt = document.createElement('option');
         opt.value = cat;
         opt.textContent = cat;
@@ -236,5 +207,9 @@ function populateCategoryDropdown() {
 }
 
 function formatAmount(amount) {
-    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    return Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+window.addEventListener('currencyChanged', () => {
+    loadExpenseData();
+});

@@ -1,27 +1,20 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is authenticated
+document.addEventListener('DOMContentLoaded', async function() {
     if (!auth.isUserLoggedIn()) {
-        return; // Auth system will handle the redirect
+        return;
     }
 
-    // Initialize data manager
     dataManager.init();
-
-    // Set default date to today
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    await loadIncomeData();
 
-    // Load income data
-    loadIncomeData();
-
-    // Form submission
     document.getElementById('income-form').addEventListener('submit', function(e) {
         e.preventDefault();
         addIncome();
     });
 });
 
-function loadIncomeData() {
-    const incomes = dataManager.getIncome();
+async function loadIncomeData() {
+    const incomes = await dataManager.getIncome();
     updateTotalIncome(incomes);
     displayRecentIncomes(incomes);
     displayAllIncomes(incomes);
@@ -29,23 +22,29 @@ function loadIncomeData() {
 
 function updateTotalIncome(incomes) {
     const total = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
-    document.getElementById('total-income').textContent = `${getCurrencySymbol()}${formatAmount(total)}`;
+    const formattedTotal = `${getCurrencySymbol()}${formatAmount(total)}`;
+    document.getElementById('total-income').textContent = formattedTotal;
+
+    const summaryTotal = document.getElementById('income-summary-total');
+    if (summaryTotal) {
+        summaryTotal.textContent = formattedTotal;
+    }
 }
 
 function displayRecentIncomes(incomes) {
     const recentContainer = document.getElementById('recent-incomes');
-    const recentIncomes = incomes.slice(-5).reverse(); // Last 5 entries
+    const recentIncomes = [...incomes].slice(-5).reverse();
 
     if (recentIncomes.length === 0) {
         recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No income entries yet.</p>';
         return;
     }
 
-    recentContainer.innerHTML = recentIncomes.map(income => `
-        <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+    recentContainer.innerHTML = recentIncomes.map((income) => `
+        <div class="list-card flex justify-between items-center">
             <div>
-                <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(income.amount)}</p>
-                <p class="text-sm text-gray-600">${income.category} • ${new Date(income.date).toLocaleDateString()}</p>
+                <p class="font-semibold text-gray-900">${getCurrencySymbol()}${formatAmount(income.amount)}</p>
+                <p class="text-sm text-gray-600">${income.category} | ${new Date(income.date).toLocaleDateString()}</p>
             </div>
         </div>
     `).join('');
@@ -59,12 +58,12 @@ function displayAllIncomes(incomes) {
         return;
     }
 
-    allContainer.innerHTML = incomes.reverse().map(income => `
-        <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+    allContainer.innerHTML = [...incomes].reverse().map((income) => `
+        <div class="list-card flex justify-between items-center gap-4">
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-medium">${getCurrencySymbol()}</span>
+                    <div class="metric-icon metric-icon--income w-10 h-10 rounded-full flex items-center justify-center">
+                        <span class="text-white font-medium">${getCurrencySymbol()}</span>
                     </div>
                     <div>
                         <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(income.amount)}</p>
@@ -95,20 +94,19 @@ async function addIncome() {
     const date = document.getElementById('date').value;
 
     if (!amount || !category || !date) {
-        alert('Please fill in all fields');
+        await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        const newIncome = dataManager.addIncome(amount, category, date);
+        await dataManager.addIncome(amount, category, date);
         document.getElementById('income-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        loadIncomeData();
-        
-        // Show success message
+        resetIncomeSubmitButton();
+        await loadIncomeData();
         showMessage('Income added successfully!', 'success');
     } catch (error) {
-        showMessage('Failed to add income. Please try again.', 'error');
+        showMessage(error.message || 'Failed to add income. Please try again.', 'error');
     }
 }
 
@@ -116,26 +114,24 @@ async function deleteIncome(id) {
     try {
         const deleted = await dataManager.deleteIncome(id);
         if (deleted) {
-            loadIncomeData();
+            await loadIncomeData();
             showMessage('Income deleted successfully!', 'success');
         }
     } catch (error) {
-        showMessage('Failed to delete income. Please try again.', 'error');
+        showMessage(error.message || 'Failed to delete income. Please try again.', 'error');
     }
 }
 
-function editIncome(id) {
-    const incomes = dataManager.getIncome();
-    const income = incomes.find(inc => inc.id === id);
-    
+async function editIncome(id) {
+    const incomes = await dataManager.getIncome();
+    const income = incomes.find((entry) => entry.id === id);
+
     if (!income) return;
 
-    // Populate form with existing data
     document.getElementById('amount').value = income.amount;
     document.getElementById('category').value = income.category;
     document.getElementById('date').value = income.date;
 
-    // Change form button text
     const submitBtn = document.querySelector('#income-form button[type="submit"]');
     submitBtn.textContent = 'Update Income';
     submitBtn.onclick = function(e) {
@@ -143,74 +139,52 @@ function editIncome(id) {
         updateIncome(id);
     };
 
-    // Scroll to form
     document.getElementById('income-form').scrollIntoView({ behavior: 'smooth' });
 }
 
-function updateIncome(id) {
+async function updateIncome(id) {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
 
     if (!amount || !category || !date) {
-        alert('Please fill in all fields');
+        await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        const updatedIncome = dataManager.updateIncome(id, amount, category, date);
-        if (updatedIncome) {
-            document.getElementById('income-form').reset();
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            
-            // Reset form button
-            const submitBtn = document.querySelector('#income-form button[type="submit"]');
-            submitBtn.textContent = 'Add Income';
-            submitBtn.onclick = function(e) {
-                e.preventDefault();
-                addIncome();
-            };
-
-            loadIncomeData();
-            showMessage('Income updated successfully!', 'success');
-        }
+        await dataManager.updateIncome(id, amount, category, date);
+        document.getElementById('income-form').reset();
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        resetIncomeSubmitButton();
+        await loadIncomeData();
+        showMessage('Income updated successfully!', 'success');
     } catch (error) {
-        showMessage('Failed to update income. Please try again.', 'error');
+        showMessage(error.message || 'Failed to update income. Please try again.', 'error');
     }
+}
+
+function resetIncomeSubmitButton() {
+    const submitBtn = document.querySelector('#income-form button[type="submit"]');
+    submitBtn.textContent = 'Add Income';
+    submitBtn.onclick = null;
 }
 
 function showMessage(message, type) {
-    // Create message element
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-red-100 text-red-800 border border-red-400'
-    }`;
-    messageDiv.textContent = message;
-
-    // Add to page
-    document.body.appendChild(messageDiv);
-
-    // Remove after 3 seconds
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.parentNode.removeChild(messageDiv);
-        }
-    }, 3000);
+    window.appUI.toast(message, type === 'success' ? 'success' : 'error');
 }
 
 function getCurrencySymbol() {
-    if (typeof dataManager !== 'undefined') {
-        const c = dataManager.getSetting('currency', 'USD');
-        const map = {USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', PHP: '₱', SGD: 'S$', CNY: '¥', KRW: '₩', INR: '₹'};
-        return map[c] || '$';
-    }
-    return '$';
+    const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');
+    const currency = appSettings.currency || 'USD';
+    const map = { USD: '$', EUR: '\u20AC', GBP: '\u00A3', CAD: 'C$', AUD: 'A$', JPY: '\u00A5', PHP: '\u20B1', SGD: 'S$', CNY: '\u00A5', KRW: '\u20A9', INR: '\u20B9' };
+    return map[currency] || '$';
 }
 
 function formatAmount(amount) {
-    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    return Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 window.addEventListener('currencyChanged', () => {
-  renderIncome();
+    loadIncomeData();
 });
