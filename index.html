@@ -18,39 +18,39 @@
 
     <!-- Hero Section -->
     <section class="landing-section relative overflow-hidden">
-        <div class="container mx-auto max-w-6xl px-4 py-8 md:py-12 relative z-10">
-            <div class="surface-panel rounded-[2rem] px-6 py-5 md:px-8 flex items-center justify-between reveal">
-                <a href="/" class="brand-mark text-3xl md:text-4xl">Budgeting <span class="accent">Buddy</span></a>
-                <div class="flex gap-3">
-                    <a href="/src/html/login.html" class="secondary-button px-5 py-3 text-sm md:text-base">Sign In</a>
-                    <a href="/src/html/register.html" class="primary-button px-5 py-3 text-sm md:text-base">Create Account</a>
+        <div class="container mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-12 relative z-10">
+            <div class="surface-panel rounded-[2rem] landing-topbar px-3 py-3.5 md:px-8 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 reveal">
+                <a href="/" class="brand-mark text-[1.7rem] sm:text-3xl md:text-4xl">Budgeting <span class="accent">Buddy</span></a>
+                <div class="grid grid-cols-2 sm:flex gap-2.5 w-full sm:w-auto">
+                    <a href="/src/html/login.html" class="secondary-button px-2.5 py-2 text-[0.82rem] md:text-base text-center">Sign In</a>
+                    <a href="/src/html/register.html" class="primary-button px-2.5 py-2 text-[0.82rem] md:text-base text-center">Create Account</a>
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-stretch pt-8 md:pt-12">
-                <div class="hero-panel rounded-[2.2rem] px-8 py-10 md:px-12 md:py-14 reveal" data-delay="1">
-                    <p class="eyebrow text-white/70 mb-4">Calm financial control</p>
-                    <h1 class="hero-title text-5xl md:text-7xl leading-none mb-6">
+            <div class="grid lg:grid-cols-[1.1fr_0.9fr] gap-5 sm:gap-8 items-stretch pt-5 sm:pt-8 md:pt-12">
+                <div class="hero-panel rounded-[2.2rem] landing-hero px-4 py-5 sm:px-8 sm:py-10 md:px-12 md:py-14 reveal" data-delay="1">
+                    <p class="eyebrow text-white/70 mb-2.5">Calm financial control</p>
+                    <h1 class="hero-title text-[1.7rem] sm:text-5xl md:text-7xl leading-none mb-3.5 sm:mb-6">
                         Plan clearly. Spend intentionally.
                     </h1>
-                    <p class="text-lg md:text-xl text-white/78 max-w-2xl leading-relaxed mb-8">
+                    <p class="text-[0.82rem] sm:text-lg md:text-xl text-white/78 max-w-2xl leading-relaxed mb-4.5 sm:mb-8">
                         Track income, monitor expenses, and build savings goals in a budgeting workspace that feels sharp,
                         modern, and easy to trust.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/src/html/dashboard.html" class="secondary-button px-7 py-4 text-center text-lg">
+                    <div class="flex flex-col sm:flex-row gap-2.5 sm:gap-4">
+                        <a href="/src/html/dashboard.html" class="secondary-button px-4 py-2 text-center text-[0.78rem] sm:text-lg">
                             Open Dashboard
                         </a>
-                        <a href="/src/html/register.html" class="bg-white/10 border border-white/20 text-white rounded-full px-7 py-4 text-center text-lg font-semibold hover:bg-white/15 transition">
+                        <a href="/src/html/register.html" class="bg-white/10 border border-white/20 text-white rounded-full px-4 py-2 text-center text-[0.78rem] sm:text-lg font-semibold hover:bg-white/15 transition">
                             Start Free
                         </a>
                     </div>
                 </div>
 
-                <div class="grid gap-5 reveal" data-delay="2">
-                    <div class="surface-panel rounded-[2rem] p-7">
+                <div class="grid gap-4 sm:gap-5 reveal" data-delay="2">
+                    <div class="surface-panel rounded-[2rem] landing-stats p-5 sm:p-7">
                         <p class="eyebrow text-slate-500 mb-3">Financial pulse</p>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-3 sm:gap-4">
                             <div class="hero-stat rounded-3xl p-5 bg-slate-900 text-white">
                                 <p class="text-sm text-white/70">Monthly balance</p>
                                 <p class="display-title text-3xl mt-2">$4,280</p>
@@ -70,9 +70,9 @@
                         </div>
                     </div>
 
-                    <div class="surface-panel rounded-[2rem] p-7">
+                    <div class="surface-panel rounded-[2rem] landing-benefits p-5 sm:p-7">
                         <p class="eyebrow text-slate-500 mb-4">What changes</p>
-                        <div class="space-y-4">
+                        <div class="space-y-3 sm:space-y-4">
                             <div class="list-card flex items-start gap-4">
                                 <div class="metric-icon metric-icon--income w-12 h-12 flex items-center justify-center shrink-0">
                                     <i data-lucide="wallet" class="w-5 h-5"></i>
@@ -99,17 +99,17 @@
     </section>
 
     <!-- Features Section -->
-    <section class="container mx-auto max-w-6xl px-4 py-20 relative z-10">
-        <div class="text-center mb-12 reveal">
+    <section class="container mx-auto max-w-6xl px-4 py-12 sm:py-20 relative z-10">
+        <div class="text-center mb-8 sm:mb-12 reveal">
             <p class="eyebrow text-slate-500 mb-3">Built for everyday budgeting</p>
             <h2 class="section-heading text-4xl md:text-5xl mb-4">Everything you need to manage your money</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+            <p class="text-gray-600 max-w-2xl mx-auto text-base sm:text-lg">
                 Simple, powerful tools to help you understand your spending, increase your savings, and achieve your
                 financial goals.
             </p>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <!-- Feature Cards -->
             <div class="surface-panel reveal rounded-[1.75rem] text-center p-7" data-delay="1">
                 <div class="metric-icon metric-icon--income w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5">
@@ -150,13 +150,13 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="container mx-auto max-w-6xl px-4 pb-16 relative z-10">
-        <div class="hero-panel rounded-[2.2rem] px-8 py-12 md:px-12 text-center reveal">
-            <h2 class="section-heading text-4xl md:text-5xl mb-4">Ready to take control of your finances?</h2>
-            <p class="text-xl mb-8 text-white/75">
+    <section class="container mx-auto max-w-6xl px-4 pb-12 sm:pb-16 relative z-10">
+        <div class="hero-panel rounded-[2.2rem] landing-cta px-5 py-7 sm:px-8 sm:py-12 md:px-12 text-center reveal">
+            <h2 class="section-heading text-[1.7rem] sm:text-4xl md:text-5xl mb-3">Ready to take control of your finances?</h2>
+            <p class="text-[0.9rem] sm:text-xl mb-6 sm:mb-8 text-white/75">
                 Join thousands of users who have transformed their financial lives.
             </p>
-            <a href="/src/html/register.html" class="secondary-button inline-flex items-center justify-center px-8 py-4 text-lg">
+            <a href="/src/html/register.html" class="secondary-button inline-flex items-center justify-center px-5 py-2.5 text-[0.85rem] sm:px-8 sm:py-4 sm:text-lg">
                 Get Started Today
             </a>
         </div>

@@ -21,10 +21,27 @@ function initializeNavbar() {
     const mobileMenu = document.getElementById('mobile-menu');
   
     if (menuToggle && mobileMenu) {
+        menuToggle.setAttribute('aria-expanded', 'false');
         menuToggle.addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
-          });
-        }
+            const isExpanded = !mobileMenu.classList.contains('hidden');
+            menuToggle.setAttribute('aria-expanded', String(isExpanded));
+        });
+
+        mobileMenu.querySelectorAll('a, button.logout-btn').forEach((element) => {
+            element.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
   
     // Update active page
     updateActivePage();

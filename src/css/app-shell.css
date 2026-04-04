@@ -428,6 +428,10 @@ body.landing-shell::before {
     backdrop-filter: blur(8px);
 }
 
+.chart-frame {
+    height: 350px;
+}
+
 @keyframes floatOrb {
     0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
     50% { transform: translate3d(0, -18px, 0) scale(1.05); }
@@ -454,6 +458,15 @@ body.landing-shell::before {
 }
 
 @media (max-width: 768px) {
+    .app-navbar .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .page-orb {
+        opacity: 0.42;
+    }
+
     .page-orb--one {
         width: 12rem;
         height: 12rem;
@@ -469,5 +482,377 @@ body.landing-shell::before {
     .hero-title,
     .display-title {
         font-size: clamp(2.2rem, 10vw, 3.2rem);
+    }
+
+    .hero-panel,
+    .surface-panel,
+    .modal-panel,
+    .auth-card {
+        border-radius: 1.5rem;
+    }
+
+    .hero-panel,
+    .surface-panel {
+        padding: 1.25rem;
+    }
+
+    .hero-stat {
+        width: 100%;
+        min-width: 0 !important;
+        text-align: left;
+    }
+
+    .metric-card {
+        padding: 1.1rem;
+    }
+
+    .popup-overlay,
+    .toast-stack {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .toast-stack {
+        left: 0;
+        right: 0;
+        top: 0.75rem;
+    }
+
+    .toast-card {
+        min-width: 0;
+        max-width: none;
+        width: 100%;
+    }
+
+    .popup-actions {
+        flex-direction: column-reverse;
+    }
+
+    .popup-actions button,
+    .popup-actions .primary-button,
+    .popup-actions .secondary-button,
+    .popup-actions .danger-button {
+        width: 100%;
+    }
+
+    #mobile-menu {
+        padding-bottom: 0.5rem;
+    }
+
+    #mobile-menu .nav-button,
+    #mobile-menu .logout-btn {
+        width: 100%;
+        text-align: left;
+    }
+
+    #mobile-menu .user-chip,
+    #mobile-menu .avatar-badge {
+        flex-shrink: 0;
+    }
+
+    #category-form {
+        flex-direction: column;
+    }
+
+    #category-form .primary-button {
+        width: 100%;
+    }
+
+    #all-incomes .list-card,
+    #all-expenses .list-card,
+    #recent-incomes .list-card,
+    #recent-expenses .list-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #all-incomes .list-card > div:last-child,
+    #all-expenses .list-card > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    #all-incomes .list-card .space-x-3,
+    #all-expenses .list-card .space-x-3 {
+        gap: 0.75rem;
+    }
+
+    #goals-list .surface-panel > div:first-child,
+    #goals-list .surface-panel .flex.justify-between.text-sm,
+    #goals-list .surface-panel .flex.gap-2,
+    .user-chip {
+        flex-wrap: wrap;
+    }
+
+    #goals-list .surface-panel .flex.gap-2,
+    #goals-list .surface-panel .flex.gap-2 .primary-button,
+    #goals-list .surface-panel .flex.gap-2 .form-input {
+        width: 100%;
+    }
+
+    #goals-list .surface-panel .edit-btn,
+    #goals-list .surface-panel .delete-btn {
+        flex: 1 1 0;
+    }
+
+    #profile-modal {
+        padding: 1rem;
+    }
+
+    #profile-modal .modal-panel {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 640px) {
+    body.app-shell,
+    body.auth-shell,
+    body.landing-shell {
+        font-size: 15px;
+    }
+
+    .content-frame .container,
+    body.app-shell > .container,
+    body.auth-shell .content-frame,
+    body.landing-shell .content-frame {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .hero-panel,
+    .surface-panel {
+        padding: 1rem;
+    }
+
+    .hero-panel .eyebrow,
+    .eyebrow {
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+    }
+
+    .section-heading {
+        font-size: 1.7rem;
+        line-height: 1.1;
+    }
+
+    .brand-mark {
+        font-size: 1.5rem;
+        line-height: 0.92;
+    }
+
+    .landing-topbar {
+        gap: 1rem;
+    }
+
+    .landing-hero,
+    .landing-stats,
+    .landing-benefits,
+    .landing-cta {
+        border-radius: 1.75rem;
+    }
+
+    .landing-hero {
+        padding: 1.35rem 1.15rem;
+    }
+
+    .landing-hero .eyebrow {
+        margin-bottom: 0.65rem;
+    }
+
+    .landing-hero .hero-title {
+        margin-bottom: 0.95rem;
+        max-width: none;
+    }
+
+    .landing-hero p.text-white\/78 {
+        margin-bottom: 1.2rem;
+        max-width: none;
+        line-height: 1.55;
+    }
+
+    .landing-hero .flex.flex-col {
+        gap: 0.85rem;
+    }
+
+    .landing-stats .grid.grid-cols-2,
+    .landing-benefits .space-y-3 {
+        gap: 0.9rem;
+    }
+
+    .landing-benefits .list-card {
+        padding: 1rem;
+    }
+
+    .landing-benefits .list-card h3 {
+        margin-bottom: 0.25rem;
+    }
+
+    .landing-cta {
+        padding-top: 1.75rem;
+        padding-bottom: 1.75rem;
+    }
+
+    .landing-cta .section-heading {
+        margin-bottom: 0.8rem;
+    }
+
+    .landing-cta p {
+        margin-bottom: 1.2rem;
+        line-height: 1.5;
+    }
+
+    .metric-icon {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .list-card {
+        padding: 0.9rem 1rem;
+    }
+
+    .chart-frame {
+        height: 300px;
+    }
+
+    .popup-card {
+        padding: 1.1rem;
+        border-radius: 1.3rem;
+    }
+
+    #mobile-menu .flex.items-center.space-x-3 {
+        align-items: flex-start;
+    }
+
+    #profile-modal .section-heading {
+        font-size: 1.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body.app-shell,
+    body.auth-shell,
+    body.landing-shell {
+        font-size: 14px;
+    }
+
+    .app-navbar {
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+    }
+
+    .brand-mark {
+        font-size: 1.25rem;
+        line-height: 0.9;
+    }
+
+    .landing-topbar {
+        padding: 1rem;
+        gap: 0.9rem;
+    }
+
+    .hero-title,
+    .display-title {
+        font-size: clamp(1.9rem, 11vw, 2.5rem);
+        line-height: 1;
+    }
+
+    body.landing-shell .hero-title {
+        font-size: clamp(1rem, 6.4vw, 1.35rem);
+        line-height: 1.02;
+    }
+
+    body.landing-shell .section-heading {
+        font-size: 1.2rem;
+    }
+
+    body.landing-shell .secondary-button,
+    body.landing-shell .primary-button {
+        font-size: 0.74rem;
+        padding: 0.55rem 0.72rem;
+    }
+
+    .landing-topbar .grid {
+        gap: 0.75rem;
+    }
+
+    .landing-hero,
+    .landing-stats,
+    .landing-benefits,
+    .landing-cta {
+        border-radius: 1.55rem;
+    }
+
+    .landing-hero {
+        padding: 1.15rem 1rem;
+    }
+
+    .landing-hero .hero-title {
+        max-width: none;
+        margin-bottom: 0.8rem;
+    }
+
+    .landing-hero p.text-white\/78 {
+        max-width: none;
+        margin-bottom: 1.05rem;
+    }
+
+    .landing-stats,
+    .landing-benefits {
+        padding: 1.05rem;
+    }
+
+    .landing-stats .hero-stat,
+    .landing-stats .list-card {
+        padding: 0.95rem;
+    }
+
+    .landing-benefits .list-card {
+        gap: 0.85rem;
+    }
+
+    .landing-cta {
+        padding: 1.5rem 1.1rem;
+    }
+
+    .landing-cta p {
+        max-width: 26ch;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body.auth-shell .display-title {
+        font-size: 1.7rem;
+        line-height: 1;
+    }
+
+    .hero-panel p.text-white\/75,
+    .surface-panel p.text-gray-500,
+    .surface-panel p.text-gray-600,
+    .surface-panel p.text-slate-500,
+    .surface-panel p.text-slate-600 {
+        font-size: 0.92rem;
+    }
+
+    .chart-frame {
+        height: 240px;
+    }
+
+    #all-incomes .list-card > div:last-child,
+    #all-expenses .list-card > div:last-child,
+    #goals-list .surface-panel > div:first-child {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #all-incomes .list-card > div:last-child span,
+    #all-expenses .list-card > div:last-child span {
+        width: 100%;
+    }
+
+    #goals-list .surface-panel .edit-btn,
+    #goals-list .surface-panel .delete-btn {
+        width: 100%;
     }
 }
