@@ -610,7 +610,7 @@ body.landing-shell::before {
     body.app-shell,
     body.auth-shell,
     body.landing-shell {
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .content-frame .container,
@@ -628,17 +628,17 @@ body.landing-shell::before {
 
     .hero-panel .eyebrow,
     .eyebrow {
-        font-size: 0.68rem;
-        letter-spacing: 0.14em;
+        font-size: 0.58rem;
+        letter-spacing: 0.11em;
     }
 
     .section-heading {
-        font-size: 1.7rem;
-        line-height: 1.1;
+        font-size: 1.2rem;
+        line-height: 1.18;
     }
 
     .brand-mark {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         line-height: 0.92;
     }
 
@@ -659,17 +659,22 @@ body.landing-shell::before {
 
     .landing-hero .eyebrow {
         margin-bottom: 0.65rem;
+        font-size: 0.54rem;
+        letter-spacing: 0.1em;
     }
 
     .landing-hero .hero-title {
         margin-bottom: 0.95rem;
         max-width: none;
+        font-size: clamp(1.05rem, 5.6vw, 1.35rem);
+        line-height: 1.08;
     }
 
     .landing-hero p.text-white\/78 {
         margin-bottom: 1.2rem;
         max-width: none;
-        line-height: 1.55;
+        font-size: 0.78rem;
+        line-height: 1.42;
     }
 
     .landing-hero .flex.flex-col {
@@ -687,6 +692,7 @@ body.landing-shell::before {
 
     .landing-benefits .list-card h3 {
         margin-bottom: 0.25rem;
+        font-size: 0.9rem;
     }
 
     .landing-cta {
@@ -696,11 +702,55 @@ body.landing-shell::before {
 
     .landing-cta .section-heading {
         margin-bottom: 0.8rem;
+        font-size: 1.05rem;
     }
 
     .landing-cta p {
         margin-bottom: 1.2rem;
+        font-size: 0.76rem;
         line-height: 1.5;
+    }
+
+    .surface-panel .text-sm,
+    .hero-panel .text-sm,
+    .modal-panel .text-sm,
+    .list-card .text-sm,
+    .hero-stat .text-sm,
+    .metric-card .text-sm,
+    .user-chip .text-sm {
+        font-size: 0.68rem;
+    }
+
+    .surface-panel .text-lg,
+    .hero-panel .text-lg,
+    .metric-card .text-lg {
+        font-size: 0.86rem;
+    }
+
+    .surface-panel .text-xl,
+    .hero-panel .text-xl,
+    .metric-card .text-xl {
+        font-size: 0.95rem;
+    }
+
+    .surface-panel .text-2xl,
+    .hero-panel .text-2xl,
+    .metric-card .text-2xl {
+        font-size: 1.08rem;
+    }
+
+    .surface-panel .text-3xl,
+    .hero-panel .text-3xl,
+    .metric-card .text-3xl,
+    .modal-panel .text-3xl {
+        font-size: 1.2rem;
+    }
+
+    .surface-panel .text-4xl,
+    .hero-panel .text-4xl,
+    .metric-card .text-4xl,
+    .modal-panel .text-4xl {
+        font-size: 1.35rem;
     }
 
     .metric-icon {
@@ -734,7 +784,7 @@ body.landing-shell::before {
     body.app-shell,
     body.auth-shell,
     body.landing-shell {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .app-navbar {
@@ -743,7 +793,7 @@ body.landing-shell::before {
     }
 
     .brand-mark {
-        font-size: 1.25rem;
+        font-size: 0.98rem;
         line-height: 0.9;
     }
 
@@ -754,23 +804,23 @@ body.landing-shell::before {
 
     .hero-title,
     .display-title {
-        font-size: clamp(1.9rem, 11vw, 2.5rem);
-        line-height: 1;
+        font-size: clamp(1.3rem, 7.2vw, 1.7rem);
+        line-height: 1.06;
     }
 
     body.landing-shell .hero-title {
-        font-size: clamp(1rem, 6.4vw, 1.35rem);
-        line-height: 1.02;
+        font-size: clamp(0.92rem, 5vw, 1.08rem);
+        line-height: 1.1;
     }
 
     body.landing-shell .section-heading {
-        font-size: 1.2rem;
+        font-size: 0.92rem;
     }
 
     body.landing-shell .secondary-button,
     body.landing-shell .primary-button {
-        font-size: 0.74rem;
-        padding: 0.55rem 0.72rem;
+        font-size: 0.64rem;
+        padding: 0.42rem 0.62rem;
     }
 
     .landing-topbar .grid {
@@ -791,11 +841,14 @@ body.landing-shell::before {
     .landing-hero .hero-title {
         max-width: none;
         margin-bottom: 0.8rem;
+        font-size: clamp(0.9rem, 4.8vw, 1rem);
     }
 
     .landing-hero p.text-white\/78 {
         max-width: none;
         margin-bottom: 1.05rem;
+        font-size: 0.72rem;
+        line-height: 1.38;
     }
 
     .landing-stats,
@@ -820,10 +873,11 @@ body.landing-shell::before {
         max-width: 26ch;
         margin-left: auto;
         margin-right: auto;
+        font-size: 0.7rem;
     }
 
     body.auth-shell .display-title {
-        font-size: 1.7rem;
+        font-size: 1.15rem;
         line-height: 1;
     }
 
@@ -832,7 +886,49 @@ body.landing-shell::before {
     .surface-panel p.text-gray-600,
     .surface-panel p.text-slate-500,
     .surface-panel p.text-slate-600 {
-        font-size: 0.92rem;
+        font-size: 0.78rem;
+    }
+
+    .surface-panel .text-sm,
+    .hero-panel .text-sm,
+    .modal-panel .text-sm,
+    .list-card .text-sm,
+    .hero-stat .text-sm,
+    .metric-card .text-sm,
+    .user-chip .text-sm {
+        font-size: 0.62rem;
+    }
+
+    .surface-panel .text-lg,
+    .hero-panel .text-lg,
+    .metric-card .text-lg {
+        font-size: 0.78rem;
+    }
+
+    .surface-panel .text-xl,
+    .hero-panel .text-xl,
+    .metric-card .text-xl {
+        font-size: 0.86rem;
+    }
+
+    .surface-panel .text-2xl,
+    .hero-panel .text-2xl,
+    .metric-card .text-2xl {
+        font-size: 0.98rem;
+    }
+
+    .surface-panel .text-3xl,
+    .hero-panel .text-3xl,
+    .metric-card .text-3xl,
+    .modal-panel .text-3xl {
+        font-size: 1.08rem;
+    }
+
+    .surface-panel .text-4xl,
+    .hero-panel .text-4xl,
+    .metric-card .text-4xl,
+    .modal-panel .text-4xl {
+        font-size: 1.2rem;
     }
 
     .chart-frame {
