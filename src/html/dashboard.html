@@ -6,6 +6,7 @@
     <title>Dashboard | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="../assets/budgeting-buddy-mark.svg" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/auth.js"></script>
@@ -33,8 +34,9 @@
                         <p class="text-white/75 text-lg">Your financial journey starts here</p>
                     </div>
                     <div class="hero-stat rounded-[1.6rem] px-6 py-5 text-right min-w-[220px]">
-                        <p class="text-white/60 text-sm">Spendable Balance</p>
+                        <p class="text-white/60 text-sm">Budget Balance</p>
                         <p id="current-balance" class="display-title text-4xl">$0</p>
+                        <p class="text-white/60 text-xs mt-2">Calculated from tracked income, expenses, and savings</p>
                     </div>
                 </div>
             </div>
@@ -103,7 +105,7 @@
             <!-- Final Summary -->
             <div class="surface-panel rounded-[1.8rem] p-6 reveal">
                 <h2 class="section-heading text-2xl mb-2">Monthly Balance Breakdown</h2>
-                <p class="text-sm text-slate-500 mb-6">Monthly spendable balance is calculated as this month's income minus this month's expenses minus savings updated this month.</p>
+                <p class="text-sm text-slate-500 mb-6">Monthly budget balance is calculated as this month's income minus this month's expenses minus savings contributions recorded this month.</p>
                 <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
                     <div class="text-center p-5 bg-emerald-50/80 rounded-[1.4rem] border border-emerald-100">
                         <p class="text-sm font-medium text-gray-600">Monthly Income</p>
@@ -118,7 +120,7 @@
                         <p id="total-saved-summary" class="text-2xl font-bold text-sky-700">$0</p>
                     </div>
                     <div class="text-center p-5 bg-amber-50/80 rounded-[1.4rem] border border-amber-100">
-                        <p class="text-sm font-medium text-gray-600">Monthly Spendable</p>
+                        <p class="text-sm font-medium text-gray-600">Monthly Budget Balance</p>
                         <p id="net-balance" class="text-2xl font-bold text-amber-700">$0</p>
                     </div>
                 </div>
@@ -157,7 +159,7 @@
                 ) {
                     const modal = document.getElementById('profile-modal');
                     if (modal) {
-                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                        const userData = window.auth?.getCurrentUser?.() || {};
                         const nameDiv = document.getElementById('profile-name');
                         const emailDiv = document.getElementById('profile-email');
                         if (nameDiv) nameDiv.textContent = userData.name || '';

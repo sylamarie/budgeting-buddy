@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', async function() {
+    if (window.auth?.ready) {
+        await window.auth.ready;
+    }
+
     if (!auth.isUserLoggedIn()) {
         return;
     }
@@ -23,11 +27,10 @@ async function loadDashboardData() {
 }
 
 function updateHeaderStats(stats) {
-    const currentBalance = stats.spendableBalance;
-    document.getElementById('current-balance').textContent = `${getCurrencySymbol()}${formatAmount(currentBalance)}`;
-
+    const budgetBalance = stats.spendableBalance;
+    document.getElementById('current-balance').textContent = `${getCurrencySymbol()}${formatAmount(budgetBalance)}`;
     const balanceElement = document.getElementById('current-balance');
-    balanceElement.className = currentBalance >= 0 ? 'display-title text-4xl text-emerald-200' : 'display-title text-4xl text-rose-200';
+    balanceElement.className = budgetBalance >= 0 ? 'display-title text-4xl text-emerald-200' : 'display-title text-4xl text-rose-200';
 }
 
 function updateSummaryCards(income, expenses, savings) {
@@ -55,8 +58,7 @@ function createExpensesChart(expenses) {
     const currentYear = new Date().getFullYear();
 
     const monthlyExpenses = expenses.filter((item) => {
-        const itemDate = new Date(item.date);
-        return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+        return dataManager.getExpenseBudgetMonth(item) === dataManager.getBudgetMonthKeyFromParts(currentYear, currentMonth);
     });
 
     const categoryData = {};
@@ -134,19 +136,13 @@ function createMonthlyOverviewChart(income, expenses, savings) {
         expenseData.push(
             expenses
                 .filter((item) => {
-                    const itemDate = new Date(item.date);
-                    return itemDate.getMonth() === date.getMonth() && itemDate.getFullYear() === date.getFullYear();
+                    return dataManager.getExpenseBudgetMonth(item) === dataManager.getBudgetMonthKeyFromParts(date.getFullYear(), date.getMonth());
                 })
                 .reduce((sum, item) => sum + parseFloat(item.amount), 0)
         );
 
         savingsData.push(
-            savings
-                .filter((goal) => {
-                    const itemDate = new Date(goal.updatedAt || goal.createdAt || new Date());
-                    return itemDate.getMonth() === date.getMonth() && itemDate.getFullYear() === date.getFullYear();
-                })
-                .reduce((sum, goal) => sum + parseFloat(goal.savedAmount), 0)
+            dataManager.getSavingsTotalForMonth(savings, date.getMonth(), date.getFullYear())
         );
     }
 

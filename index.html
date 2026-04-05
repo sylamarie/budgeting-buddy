@@ -7,6 +7,7 @@
     <title>Budgeting Buddy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" type="image/svg+xml" href="/src/assets/budgeting-buddy-mark.svg" />
     <link rel="stylesheet" href="/src/css/app-shell.css" />
     <script defer src="/src/js/ui.js"></script>
 </head>
@@ -20,7 +21,9 @@
     <section class="landing-section relative overflow-hidden">
         <div class="container mx-auto max-w-6xl px-4 py-6 sm:py-8 md:py-12 relative z-10">
             <div class="surface-panel rounded-[2rem] landing-topbar px-3 py-3.5 md:px-8 md:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 reveal">
-                <a href="/" class="brand-mark text-[1.7rem] sm:text-3xl md:text-4xl">Budgeting <span class="accent">Buddy</span></a>
+                <a href="/" class="brand-lockup" aria-label="Budgeting Buddy home">
+                    <img src="/src/assets/budgeting-buddy-logo.svg" alt="Budgeting Buddy logo" class="brand-logo-image brand-logo-image--landing" />
+                </a>
                 <div class="grid grid-cols-2 sm:flex gap-2.5 w-full sm:w-auto">
                     <a href="/src/html/login.html" class="secondary-button px-2.5 py-2 text-[0.82rem] md:text-base text-center">Sign In</a>
                     <a href="/src/html/register.html" class="primary-button px-2.5 py-2 text-[0.82rem] md:text-base text-center">Create Account</a>

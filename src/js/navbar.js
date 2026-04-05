@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    if (window.auth?.ready) {
+        await window.auth.ready;
+    }
+
     loadNavbar();
 });
 
@@ -76,32 +80,22 @@ function updateActivePage() {
 }
 
 function updateUserProfile() {
-    // Get user data from localStorage
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-        try {
-            const user = JSON.parse(userData);
-            
-            // Update user initials
-            const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
-            const userInitials = document.getElementById('user-initials');
-            const mobileUserInitials = document.getElementById('mobile-user-initials');
-            
-            if (userInitials) userInitials.textContent = initials;
-            if (mobileUserInitials) mobileUserInitials.textContent = initials;
-            
-            // Update user name
-            const userName = document.getElementById('user-name');
-            const mobileUserName = document.getElementById('mobile-user-name');
-            const mobileUserEmail = document.getElementById('mobile-user-email');
-            
-            if (userName) userName.textContent = user.name;
-            if (mobileUserName) mobileUserName.textContent = user.name;
-            if (mobileUserEmail) mobileUserEmail.textContent = user.email;
-            
-        } catch (error) {
-            console.error('Error parsing user data:', error);
-        }
+    const user = window.auth?.getCurrentUser?.();
+    if (user) {
+        const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+        const userInitials = document.getElementById('user-initials');
+        const mobileUserInitials = document.getElementById('mobile-user-initials');
+
+        if (userInitials) userInitials.textContent = initials;
+        if (mobileUserInitials) mobileUserInitials.textContent = initials;
+
+        const userName = document.getElementById('user-name');
+        const mobileUserName = document.getElementById('mobile-user-name');
+        const mobileUserEmail = document.getElementById('mobile-user-email');
+
+        if (userName) userName.textContent = user.name;
+        if (mobileUserName) mobileUserName.textContent = user.name;
+        if (mobileUserEmail) mobileUserEmail.textContent = user.email;
     }
 }
 
@@ -121,7 +115,7 @@ function setupProfileModal() {
       ) {
         const modal = document.getElementById('profile-modal');
         if (modal) {
-          const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+          const userData = window.auth?.getCurrentUser?.() || {};
           const nameDiv = document.getElementById('profile-name');
           const emailDiv = document.getElementById('profile-email');
           if (nameDiv) nameDiv.textContent = userData.name || '';

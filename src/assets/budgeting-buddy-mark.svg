@@ -1,0 +1,23 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bb-shell" x1="58" y1="54" x2="196" y2="196" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#163E57"/>
+      <stop offset="1" stop-color="#0F8B8D"/>
+    </linearGradient>
+    <linearGradient id="bb-line" x1="84" y1="110" x2="175" y2="158" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#82E2D5"/>
+      <stop offset="1" stop-color="#B8F5EC"/>
+    </linearGradient>
+  </defs>
+  <path d="M86 78C86 64.7452 96.7452 54 110 54H146C159.255 54 170 64.7452 170 78V92H180C198.778 92 214 107.222 214 126V158C214 176.778 198.778 192 180 192H76C57.2223 192 42 176.778 42 158V126C42 107.222 57.2223 92 76 92H86V78Z" fill="#10212B"/>
+  <path d="M98 80C98 73.3726 103.373 68 110 68H146C152.627 68 158 73.3726 158 80V92H98V80Z" fill="url(#bb-shell)"/>
+  <rect x="56" y="104" width="144" height="70" rx="18" fill="white"/>
+  <path d="M145 104H182C191.941 104 200 112.059 200 122V144H145C134.507 144 126 135.493 126 125C126 114.507 134.507 106 145 106V104Z" fill="#E5F8F4"/>
+  <circle cx="152" cy="125" r="7.5" fill="#0F8B8D"/>
+  <path d="M83 145L101 127L115 139L136 116L159 132" stroke="url(#bb-line)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M156 132H173V115" stroke="url(#bb-line)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M82 118V146" stroke="#12344D" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"/>
+  <path d="M101 124V146" stroke="#12344D" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"/>
+  <path d="M120 116V146" stroke="#12344D" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"/>
+  <path d="M139 106V146" stroke="#12344D" stroke-opacity="0.16" stroke-width="10" stroke-linecap="round"/>
+</svg>

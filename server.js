@@ -10,7 +10,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017';
 const MONGODB_DB = process.env.MONGODB_DB || 'budgeting-buddy';
+const SESSION_COOKIE_NAME = 'bb_session';
+const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 7;
 const DATA_COLLECTIONS = ['income', 'expenses', 'savings', 'settings'];
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PRODUCTION = NODE_ENV === 'production';
+const SESSION_SECRET = getSessionSecret();
 
 let dbPromise;
 
@@ -43,6 +48,18 @@ function loadEnvFile() {
       process.env[key] = value;
     }
   }
+}
+
+function getSessionSecret() {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  if (IS_PRODUCTION) {
+    throw new Error('SESSION_SECRET is required in production.');
+  }
+
+  return 'development-session-secret-change-me';
 }
 
 function getDb() {
@@ -90,6 +107,10 @@ function ensureValidCollection(type) {
 }
 
 async function ensureDemoUser(db) {
+  if (IS_PRODUCTION || process.env.DEMO_USER_ENABLED === 'false') {
+    return;
+  }
+
   const users = db.collection('users');
   const existing = await users.findOne({ email: 'demo@example.com' });
 
@@ -106,6 +127,121 @@ async function ensureDemoUser(db) {
   });
 }
 
+function parseCookies(cookieHeader = '') {
+  return cookieHeader.split(';').reduce((cookies, entry) => {
+    const [name, ...valueParts] = entry.trim().split('=');
+    if (!name) {
+      return cookies;
+    }
+
+    cookies[name] = decodeURIComponent(valueParts.join('=') || '');
+    return cookies;
+  }, {});
+}
+
+function createSessionToken(userId, expiresAt) {
+  const payload = `${userId}.${expiresAt}`;
+  const signature = crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(payload)
+    .digest('hex');
+
+  return `${payload}.${signature}`;
+}
+
+function verifySessionToken(token) {
+  if (!token) {
+    return null;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [userId, expiresAt, signature] = parts;
+  const payload = `${userId}.${expiresAt}`;
+  const expectedSignature = crypto
+    .createHmac('sha256', SESSION_SECRET)
+    .update(payload)
+    .digest('hex');
+
+  if (!crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expectedSignature, 'hex'))) {
+    return null;
+  }
+
+  if (!ObjectId.isValid(userId) || Number(expiresAt) <= Date.now()) {
+    return null;
+  }
+
+  return { userId, expiresAt: Number(expiresAt) };
+}
+
+function serializeCookie(name, value, options = {}) {
+  const segments = [`${name}=${encodeURIComponent(value)}`];
+
+  if (options.httpOnly) segments.push('HttpOnly');
+  if (options.sameSite) segments.push(`SameSite=${options.sameSite}`);
+  if (options.secure) segments.push('Secure');
+  if (options.path) segments.push(`Path=${options.path}`);
+  if (typeof options.maxAge === 'number') segments.push(`Max-Age=${Math.max(0, Math.floor(options.maxAge))}`);
+
+  return segments.join('; ');
+}
+
+function setSessionCookie(res, userId) {
+  const expiresAt = Date.now() + SESSION_DURATION_MS;
+  const token = createSessionToken(userId, expiresAt);
+
+  res.setHeader('Set-Cookie', serializeCookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    secure: IS_PRODUCTION,
+    path: '/',
+    maxAge: SESSION_DURATION_MS / 1000
+  }));
+}
+
+function clearSessionCookie(res) {
+  res.setHeader('Set-Cookie', serializeCookie(SESSION_COOKIE_NAME, '', {
+    httpOnly: true,
+    sameSite: 'Lax',
+    secure: IS_PRODUCTION,
+    path: '/',
+    maxAge: 0
+  }));
+}
+
+async function getAuthenticatedUser(req) {
+  const cookies = parseCookies(req.headers.cookie);
+  const session = verifySessionToken(cookies[SESSION_COOKIE_NAME]);
+
+  if (!session) {
+    return null;
+  }
+
+  const db = await getDb();
+  const user = await db.collection('users').findOne({ _id: new ObjectId(session.userId) });
+  return user || null;
+}
+
+async function requireAuth(req, res, next) {
+  try {
+    const user = await getAuthenticatedUser(req);
+
+    if (!user) {
+      clearSessionCookie(res);
+      return res.status(401).json({ error: 'Authentication required.' });
+    }
+
+    req.user = user;
+    return next();
+  } catch (error) {
+    console.error('Authentication check failed:', error);
+    return res.status(500).json({ error: 'Authentication failed.' });
+  }
+}
+
 async function replaceCollection(db, userId, type, items) {
   const collection = db.collection(type);
   await collection.deleteMany({ userId });
@@ -116,12 +252,13 @@ async function replaceCollection(db, userId, type, items) {
 
   const documents = items.map((item) => {
     const { id, _id, ...rest } = item;
+    const timestamp = new Date().toISOString();
 
     return {
       ...rest,
       userId,
-      createdAt: rest.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: rest.createdAt || timestamp,
+      updatedAt: rest.updatedAt || timestamp
     };
   });
 
@@ -164,6 +301,7 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     const user = await users.findOne({ _id: result.insertedId });
+    setSessionCookie(res, user._id.toString());
     return res.status(201).json({ user: toPublicUser(user) });
   } catch (error) {
     console.error('Register failed:', error);
@@ -188,6 +326,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
+    setSessionCookie(res, user._id.toString());
     return res.json({ user: toPublicUser(user) });
   } catch (error) {
     console.error('Login failed:', error);
@@ -195,8 +334,17 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.get('/api/users/:userId/export', async (req, res) => {
-  const { userId } = req.params;
+app.post('/api/auth/logout', (req, res) => {
+  clearSessionCookie(res);
+  return res.status(204).send();
+});
+
+app.get('/api/auth/session', requireAuth, async (req, res) => {
+  return res.json({ user: toPublicUser(req.user) });
+});
+
+app.get('/api/me/export', requireAuth, async (req, res) => {
+  const userId = req.user._id.toString();
 
   try {
     const db = await getDb();
@@ -219,8 +367,8 @@ app.get('/api/users/:userId/export', async (req, res) => {
   }
 });
 
-app.delete('/api/users/:userId/data', async (req, res) => {
-  const { userId } = req.params;
+app.delete('/api/me/data', requireAuth, async (req, res) => {
+  const userId = req.user._id.toString();
 
   try {
     const db = await getDb();
@@ -232,8 +380,7 @@ app.delete('/api/users/:userId/data', async (req, res) => {
   }
 });
 
-app.patch('/api/users/:userId/profile', async (req, res) => {
-  const { userId } = req.params;
+app.patch('/api/me/profile', requireAuth, async (req, res) => {
   const { name, email } = req.body || {};
 
   if (!name || !email) {
@@ -246,7 +393,7 @@ app.patch('/api/users/:userId/profile', async (req, res) => {
     const normalizedEmail = String(email).trim().toLowerCase();
     const duplicate = await users.findOne({
       email: normalizedEmail,
-      _id: { $ne: new ObjectId(userId) }
+      _id: { $ne: req.user._id }
     });
 
     if (duplicate) {
@@ -254,7 +401,7 @@ app.patch('/api/users/:userId/profile', async (req, res) => {
     }
 
     await users.updateOne(
-      { _id: new ObjectId(userId) },
+      { _id: req.user._id },
       {
         $set: {
           name: String(name).trim(),
@@ -264,7 +411,7 @@ app.patch('/api/users/:userId/profile', async (req, res) => {
       }
     );
 
-    const user = await users.findOne({ _id: new ObjectId(userId) });
+    const user = await users.findOne({ _id: req.user._id });
     return res.json({ user: toPublicUser(user) });
   } catch (error) {
     console.error('Profile update failed:', error);
@@ -272,8 +419,7 @@ app.patch('/api/users/:userId/profile', async (req, res) => {
   }
 });
 
-app.patch('/api/users/:userId/password', async (req, res) => {
-  const { userId } = req.params;
+app.patch('/api/me/password', requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
 
   if (!currentPassword || !newPassword) {
@@ -283,7 +429,7 @@ app.patch('/api/users/:userId/password', async (req, res) => {
   try {
     const db = await getDb();
     const users = db.collection('users');
-    const user = await users.findOne({ _id: new ObjectId(userId) });
+    const user = await users.findOne({ _id: req.user._id });
 
     if (!user || !verifyPassword(currentPassword, user.passwordSalt, user.passwordHash)) {
       return res.status(401).json({ error: 'Current password is incorrect.' });
@@ -291,7 +437,7 @@ app.patch('/api/users/:userId/password', async (req, res) => {
 
     const { salt, hash } = createPasswordHash(newPassword);
     await users.updateOne(
-      { _id: user._id },
+      { _id: req.user._id },
       {
         $set: {
           passwordSalt: salt,
@@ -308,8 +454,9 @@ app.patch('/api/users/:userId/password', async (req, res) => {
   }
 });
 
-app.get('/api/users/:userId/:type', async (req, res) => {
-  const { userId, type } = req.params;
+app.get('/api/me/:type', requireAuth, async (req, res) => {
+  const { type } = req.params;
+  const userId = req.user._id.toString();
 
   if (!ensureValidCollection(type)) {
     return res.status(404).json({ error: 'Unknown data collection.' });
@@ -325,8 +472,9 @@ app.get('/api/users/:userId/:type', async (req, res) => {
   }
 });
 
-app.post('/api/users/:userId/:type', async (req, res) => {
-  const { userId, type } = req.params;
+app.post('/api/me/:type', requireAuth, async (req, res) => {
+  const { type } = req.params;
+  const userId = req.user._id.toString();
 
   if (!ensureValidCollection(type)) {
     return res.status(404).json({ error: 'Unknown data collection.' });
@@ -351,8 +499,9 @@ app.post('/api/users/:userId/:type', async (req, res) => {
   }
 });
 
-app.put('/api/users/:userId/:type', async (req, res) => {
-  const { userId, type } = req.params;
+app.put('/api/me/:type', requireAuth, async (req, res) => {
+  const { type } = req.params;
+  const userId = req.user._id.toString();
 
   if (!ensureValidCollection(type)) {
     return res.status(404).json({ error: 'Unknown data collection.' });
@@ -368,8 +517,9 @@ app.put('/api/users/:userId/:type', async (req, res) => {
   }
 });
 
-app.patch('/api/users/:userId/:type/:id', async (req, res) => {
+app.patch('/api/me/:type/:id', requireAuth, async (req, res) => {
   const { type, id } = req.params;
+  const userId = req.user._id.toString();
 
   if (!ensureValidCollection(type)) {
     return res.status(404).json({ error: 'Unknown data collection.' });
@@ -377,26 +527,31 @@ app.patch('/api/users/:userId/:type/:id', async (req, res) => {
 
   try {
     const db = await getDb();
-    await db.collection(type).updateOne(
-      { _id: new ObjectId(id) },
+    const result = await db.collection(type).findOneAndUpdate(
+      { _id: new ObjectId(id), userId },
       {
         $set: {
           ...req.body,
           updatedAt: new Date().toISOString()
         }
-      }
+      },
+      { returnDocument: 'after' }
     );
 
-    const item = await db.collection(type).findOne({ _id: new ObjectId(id) });
-    return res.json({ item: serializeDocument(item) });
+    if (!result) {
+      return res.status(404).json({ error: 'Item not found.' });
+    }
+
+    return res.json({ item: serializeDocument(result) });
   } catch (error) {
     console.error(`Update ${type} failed:`, error);
     return res.status(500).json({ error: `Failed to update ${type} item.` });
   }
 });
 
-app.delete('/api/users/:userId/:type/:id', async (req, res) => {
+app.delete('/api/me/:type/:id', requireAuth, async (req, res) => {
   const { type, id } = req.params;
+  const userId = req.user._id.toString();
 
   if (!ensureValidCollection(type)) {
     return res.status(404).json({ error: 'Unknown data collection.' });
@@ -404,7 +559,12 @@ app.delete('/api/users/:userId/:type/:id', async (req, res) => {
 
   try {
     const db = await getDb();
-    await db.collection(type).deleteOne({ _id: new ObjectId(id) });
+    const result = await db.collection(type).deleteOne({ _id: new ObjectId(id), userId });
+
+    if (!result.deletedCount) {
+      return res.status(404).json({ error: 'Item not found.' });
+    }
+
     return res.status(204).send();
   } catch (error) {
     console.error(`Delete ${type} failed:`, error);
@@ -452,8 +612,8 @@ getDb()
   .then((db) => ensureDemoUser(db))
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
-      console.log(`MongoDB: ${MONGODB_URI}/${MONGODB_DB}`);
+      console.log(`Server running on port ${PORT}`);
+      console.log(`MongoDB database: ${MONGODB_DB}`);
     });
   })
   .catch((error) => {

@@ -35,18 +35,20 @@ Budgeting Buddy is a simple web app that helps you track your income, expenses, 
 ## Environment Variables
 
 ```env
-MONGODB_URI=mongodb+srv://budgetingbuddy:BudgetBuddy@budgetingbuddy.ravjf7z.mongodb.net/?appName=budgetingbuddy
-MONGODB_DB=budgetingbuddy
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
+MONGODB_DB=budgeting-buddy
 PORT=3000
+SESSION_SECRET=replace-this-with-a-long-random-secret
 ```
 
 ## Notes
 
 - Copy `.env.example` values into your shell environment if needed.
-- A demo account is created automatically on startup:
+- In local development, a demo account is created automatically on startup:
   `demo@example.com` / `demo123`
 - If PowerShell blocks `npm`, run `cmd /c npm.cmd start` instead.
 - The app is deployed on Render at `https://budgetingbuddy.onrender.com/`
+- If you previously exposed a MongoDB password or URI, rotate it in MongoDB Atlas and update Render environment variables before redeploying.
 
 ## License
 

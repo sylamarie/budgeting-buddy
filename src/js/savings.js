@@ -1,13 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  if (window.auth?.ready) {
+    await window.auth.ready;
+  }
+
   const form = document.getElementById('goal-form');
   const goalsList = document.getElementById('goals-list');
   const emptyMessage = document.getElementById('empty-message');
+  const savedAmountInput = document.getElementById('savedAmount');
   let editingGoalId = null;
 
   async function updateStats() {
     const goals = await dataManager.getSavings();
     const totalTarget = goals.reduce((sum, goal) => sum + Number(goal.targetAmount), 0);
-    const totalSaved = goals.reduce((sum, goal) => sum + Number(goal.savedAmount), 0);
+    const totalSaved = goals.reduce((sum, goal) => sum + dataManager.getSavingsGoalTotal(goal), 0);
     const progress = totalTarget ? (totalSaved / totalTarget) * 100 : 0;
 
     const progressLabel = `${progress.toFixed(1)}%`;
@@ -24,10 +29,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const goals = await dataManager.getSavings();
     goalsList.innerHTML = '';
 
-    goals.forEach((goal) => {
+    for (const goal of goals) {
       const container = document.createElement('div');
       container.className = 'surface-panel rounded-[1.6rem] p-6';
-      const progress = (goal.savedAmount / goal.targetAmount) * 100;
+      const savedAmount = dataManager.getSavingsGoalTotal(goal);
+      const progress = goal.targetAmount ? (savedAmount / goal.targetAmount) * 100 : 0;
       const isCompleted = progress >= 100;
       const createdDate = goal.createdDate || goal.createdAt || new Date().toISOString().split('T')[0];
 
@@ -51,16 +57,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="h-3 rounded-full ${isCompleted ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-amber-500 to-teal-500'}" style="width: ${Math.min(progress, 100)}%;"></div>
           </div>
           <div class="flex justify-between text-sm text-gray-600">
-            <span>${getCurrencySymbol()}${formatAmount(goal.savedAmount)}</span>
+            <span>${getCurrencySymbol()}${formatAmount(savedAmount)}</span>
             <span>${getCurrencySymbol()}${formatAmount(goal.targetAmount)}</span>
           </div>
         </div>
         ${
           isCompleted
             ? '<div class="text-center bg-green-50 border border-green-200 p-3 rounded-2xl text-green-700 font-medium">Goal Completed!</div>'
-            : `<div class="flex gap-2">
-                <input type="number" placeholder="Add amount" class="update-input form-input flex-1" />
-                <button class="add-btn primary-button px-4 py-3">Add</button>
+            : `<div class="space-y-3">
+                <div class="flex gap-2 flex-col sm:flex-row">
+                  <input type="number" placeholder="Add amount" class="update-input form-input flex-1" />
+                  <button class="add-btn primary-button px-4 py-3">Add</button>
+                </div>
+                <div>
+                  <select class="budget-month-select form-select">
+                    <option value="">Select budget month</option>
+                  </select>
+                  <p class="budget-month-note text-xs text-slate-500 mt-2">Choose the month this savings contribution should reduce.</p>
+                </div>
               </div>`
         }
       `;
@@ -74,31 +88,36 @@ document.addEventListener('DOMContentLoaded', async () => {
       container.querySelector('.edit-btn').addEventListener('click', () => {
         document.getElementById('goalName').value = goal.goalName;
         document.getElementById('targetAmount').value = goal.targetAmount;
-        document.getElementById('savedAmount').value = goal.savedAmount;
+        document.getElementById('savedAmount').value = savedAmount;
         editingGoalId = goal.id;
         form.querySelector("button[type='submit']").textContent = 'Update Goal';
       });
 
       const addBtn = container.querySelector('.add-btn');
       const input = container.querySelector('.update-input');
-      if (addBtn && input) {
+      const budgetMonthSelect = container.querySelector('.budget-month-select');
+      const budgetMonthNote = container.querySelector('.budget-month-note');
+      if (budgetMonthSelect) {
+        await populateBudgetMonthSelect(budgetMonthSelect, budgetMonthNote);
+      }
+
+      if (addBtn && input && budgetMonthSelect) {
         addBtn.addEventListener('click', async () => {
           const addAmount = parseFloat(input.value || '0');
-          if (!isNaN(addAmount) && addAmount > 0) {
-            await dataManager.updateSavingsGoal(
-              goal.id,
-              goal.goalName,
-              goal.targetAmount,
-              Math.min(Number(goal.savedAmount) + addAmount, goal.targetAmount)
-            );
-            await renderGoals();
-            await updateStats();
+          const budgetMonth = budgetMonthSelect.value;
+          if (isNaN(addAmount) || addAmount <= 0 || !budgetMonth) {
+            await window.appUI.alert('Enter an amount and choose a budget month with remaining balance.', { title: 'Missing details' });
+            return;
           }
+
+          await dataManager.addSavingsContribution(goal.id, addAmount, new Date().toISOString(), budgetMonth);
+          await renderGoals();
+          await updateStats();
         });
       }
 
       goalsList.appendChild(container);
-    });
+    }
   }
 
   form.addEventListener('submit', async (e) => {
@@ -106,9 +125,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const name = document.getElementById('goalName').value.trim();
     const target = parseFloat(document.getElementById('targetAmount').value);
     const saved = parseFloat(document.getElementById('savedAmount').value);
+    const initialBudgetMonth = document.getElementById('initial-budget-month').value;
 
     if (!name || isNaN(target) || isNaN(saved)) {
       await window.appUI.alert('Please fill in all fields correctly.', { title: 'Missing details' });
+      return;
+    }
+
+    if (!editingGoalId && saved > 0 && !initialBudgetMonth) {
+      await window.appUI.alert('Choose which budget month should absorb this saved amount.', { title: 'Missing budget month' });
       return;
     }
 
@@ -117,23 +142,119 @@ document.addEventListener('DOMContentLoaded', async () => {
       editingGoalId = null;
       form.querySelector("button[type='submit']").textContent = 'Create Goal';
     } else {
-      await dataManager.addSavingsGoal(name, target, saved);
+      await dataManager.addSavingsGoal(name, target, saved, initialBudgetMonth);
     }
 
     form.reset();
     form.querySelector("button[type='submit']").textContent = 'Create Goal';
+    await updateInitialBudgetMonthState();
     await renderGoals();
     await updateStats();
   });
 
+  if (savedAmountInput) {
+    savedAmountInput.addEventListener('input', async () => {
+      await updateInitialBudgetMonthState();
+    });
+  }
+
+  await populateInitialBudgetMonthSelect();
+  await updateInitialBudgetMonthState();
   await renderGoals();
   await updateStats();
 
   window.addEventListener('currencyChanged', async () => {
+    await populateInitialBudgetMonthSelect();
+    await updateInitialBudgetMonthState();
     await renderGoals();
     await updateStats();
   });
+
+  async function populateInitialBudgetMonthSelect(selectedKey = '') {
+    const select = document.getElementById('initial-budget-month');
+    const note = document.getElementById('initial-budget-month-help');
+    if (!select) return;
+
+    await populateBudgetMonthSelect(select, note, selectedKey);
+  }
+
+  async function updateInitialBudgetMonthState() {
+    const select = document.getElementById('initial-budget-month');
+    const note = document.getElementById('initial-budget-month-help');
+    const amount = parseFloat(savedAmountInput?.value || '0');
+
+    if (!select) return;
+
+    if (amount > 0) {
+      select.disabled = select.options.length <= 1;
+      if (note && select.options.length > 1) {
+        note.textContent = 'Choose the month this saved amount should reduce.';
+      }
+      return;
+    }
+
+    select.value = '';
+    select.disabled = true;
+    if (note) {
+      note.textContent = 'Required only when the saved amount is greater than zero.';
+    }
+  }
 });
+
+async function populateBudgetMonthSelect(select, noteElement, selectedKey = '') {
+  if (!select) return;
+
+  const months = await getSelectableBudgetMonths(selectedKey || select.value);
+  const existingValue = selectedKey || select.value;
+
+  select.innerHTML = '<option value="">Select budget month</option>';
+
+  months.forEach((month) => {
+    const option = document.createElement('option');
+    option.value = month.key;
+    option.textContent = `${month.label} (${getCurrencySymbol()}${formatAmount(month.remaining)} left)`;
+    select.appendChild(option);
+  });
+
+  if (existingValue && [...select.options].some((option) => option.value === existingValue)) {
+    select.value = existingValue;
+  }
+
+  if (noteElement && months.length === 0) {
+    noteElement.textContent = 'No month has remaining budget right now. Add income first or free up an earlier month.';
+  } else if (noteElement && !noteElement.id) {
+    noteElement.textContent = 'Choose the month this savings contribution should reduce.';
+  }
+}
+
+async function getSelectableBudgetMonths(selectedKey = '') {
+  const months = await dataManager.getAvailableBudgetMonths();
+
+  if (!selectedKey || months.some((month) => month.key === selectedKey)) {
+    return months;
+  }
+
+  const [income, expenses, savings] = await Promise.all([
+    dataManager.getIncome(),
+    dataManager.getExpenses(),
+    dataManager.getSavings()
+  ]);
+  const fallbackMonth = dataManager
+    .getBudgetMonthBreakdown(income, expenses, savings)
+    .find((month) => month.key === selectedKey);
+
+  if (!fallbackMonth) {
+    return months;
+  }
+
+  return [
+    ...months,
+    {
+      ...fallbackMonth,
+      label: `${fallbackMonth.label} (currently assigned)`
+    }
+  ].sort((a, b) => b.key.localeCompare(a.key));
+}
 
 function getCurrencySymbol() {
   const appSettings = JSON.parse(localStorage.getItem('appSettings') || '{}');

@@ -1,4 +1,11 @@
+const INITIAL_HISTORY_ITEMS = 5;
+let isIncomeHistoryExpanded = false;
+
 document.addEventListener('DOMContentLoaded', async function() {
+    if (window.auth?.ready) {
+        await window.auth.ready;
+    }
+
     if (!auth.isUserLoggedIn()) {
         return;
     }
@@ -6,6 +13,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     dataManager.init();
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
     await loadIncomeData();
+
+    const toggleHistoryBtn = document.getElementById('toggle-income-history');
+    if (toggleHistoryBtn) {
+        toggleHistoryBtn.addEventListener('click', async () => {
+            isIncomeHistoryExpanded = !isIncomeHistoryExpanded;
+            await loadIncomeData();
+        });
+    }
 
     document.getElementById('income-form').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -33,7 +48,7 @@ function updateTotalIncome(incomes) {
 
 function displayRecentIncomes(incomes) {
     const recentContainer = document.getElementById('recent-incomes');
-    const recentIncomes = [...incomes].slice(-5).reverse();
+    const recentIncomes = [...incomes].slice(-3).reverse();
 
     if (recentIncomes.length === 0) {
         recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No income entries yet.</p>';
@@ -52,13 +67,20 @@ function displayRecentIncomes(incomes) {
 
 function displayAllIncomes(incomes) {
     const allContainer = document.getElementById('all-incomes');
+    const toggleHistoryBtn = document.getElementById('toggle-income-history');
 
     if (incomes.length === 0) {
         allContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No income entries yet. Add your first income above!</p>';
+        if (toggleHistoryBtn) {
+            toggleHistoryBtn.classList.add('hidden');
+        }
         return;
     }
 
-    allContainer.innerHTML = [...incomes].reverse().map((income) => `
+    const allHistory = [...incomes].reverse();
+    const visibleHistory = isIncomeHistoryExpanded ? allHistory : allHistory.slice(0, INITIAL_HISTORY_ITEMS);
+
+    allContainer.innerHTML = visibleHistory.map((income) => `
         <div class="list-card flex justify-between items-center gap-4">
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
@@ -86,6 +108,14 @@ function displayAllIncomes(incomes) {
             </div>
         </div>
     `).join('');
+
+    if (toggleHistoryBtn) {
+        const hasMoreItems = allHistory.length > INITIAL_HISTORY_ITEMS;
+        toggleHistoryBtn.classList.toggle('hidden', !hasMoreItems);
+        toggleHistoryBtn.textContent = isIncomeHistoryExpanded
+            ? 'See less'
+            : `See full history (${allHistory.length})`;
+    }
 }
 
 async function addIncome() {

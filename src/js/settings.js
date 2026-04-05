@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  if (window.auth?.ready) {
+    await window.auth.ready;
+  }
+
   if (typeof dataManager !== 'undefined' && typeof dataManager.init === 'function') {
     dataManager.init();
   }
@@ -18,9 +22,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const categoryList = document.getElementById('category-list');
   const displayNameInput = document.getElementById('displayName');
   const emailInput = document.getElementById('email');
-  const exportBtn = Array.from(document.querySelectorAll('button')).find((btn) => btn.textContent.includes('Export Data'));
-  const importBtn = Array.from(document.querySelectorAll('button')).find((btn) => btn.textContent.includes('Import Data'));
-  const clearBtn = Array.from(document.querySelectorAll('button')).find((btn) => btn.textContent.includes('Clear All Data'));
+  const settingsNavItems = Array.from(document.querySelectorAll('.settings-nav-item'));
+  const settingsPanels = Array.from(document.querySelectorAll('.settings-panel'));
+  const updateProfileBtn = document.getElementById('updateProfileBtn');
+  const exportBtn = document.getElementById('exportDataBtn');
+  const importBtn = document.getElementById('importDataBtn');
+  const clearBtn = document.getElementById('clearDataBtn');
 
   const currencyNames = {
     USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound',
@@ -31,6 +38,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateCurrencyDisplay() {
     currentCurrencyDisplay.textContent = `${currencyNames[currency]} (${currency})`;
     currencySelect.value = currency;
+  }
+
+  function showSettingsPanel(panelId) {
+    settingsNavItems.forEach((item) => {
+      const isActive = item.dataset.settingsTarget === panelId;
+      item.classList.toggle('is-active', isActive);
+      item.setAttribute('aria-selected', String(isActive));
+    });
+
+    settingsPanels.forEach((panel) => {
+      const isActive = panel.id === panelId;
+      panel.classList.toggle('hidden', !isActive);
+      panel.classList.toggle('is-active', isActive);
+    });
   }
 
   async function renderCategories() {
@@ -98,20 +119,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   if (displayNameInput && emailInput) {
-    let updateProfileBtn = null;
-    const parentDiv = displayNameInput.closest('div');
-    if (parentDiv) {
-      updateProfileBtn = Array.from(parentDiv.parentElement.querySelectorAll('button')).find((btn) => btn.textContent.trim() === 'Update Profile');
-    }
-
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const userData = window.auth?.getCurrentUser?.() || {};
     displayNameInput.value = userData.name || '';
     emailInput.value = userData.email || '';
 
     if (updateProfileBtn) {
       updateProfileBtn.onclick = async () => {
         try {
-          const payload = await window.apiRequest(`/api/users/${userData.id}/profile`, {
+          const payload = await window.apiRequest('/api/me/profile', {
             method: 'PATCH',
             body: JSON.stringify({
               name: displayNameInput.value.trim(),
@@ -191,7 +206,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       await window.appUI.alert('Please fill in all password fields.', { title: 'Missing password fields' });
@@ -211,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      await window.apiRequest(`/api/users/${userData.id}/password`, {
+      await window.apiRequest('/api/me/password', {
         method: 'PATCH',
         body: JSON.stringify({ currentPassword, newPassword })
       });
@@ -224,11 +238,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         tone: 'danger'
       });
       if (shouldLogout) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-        setTimeout(() => {
-          window.location.href = '/index.html';
-        }, 300);
+        await window.apiRequest('/api/auth/logout', {
+          method: 'POST'
+        });
+        if (window.auth && typeof window.auth.clearLocalSession === 'function') {
+          window.auth.clearLocalSession();
+        }
+        window.location.href = '/';
       } else {
         window.appUI.toast('Password updated successfully.', 'success');
       }
@@ -241,6 +257,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     changePasswordForm.onsubmit = handlePasswordChangeSubmit;
   }
 
+  settingsNavItems.forEach((item) => {
+    item.addEventListener('click', () => {
+      showSettingsPanel(item.dataset.settingsTarget);
+    });
+  });
+
   updateCurrencyDisplay();
   await renderCategories();
+  showSettingsPanel('currency-panel');
 });

@@ -106,6 +106,26 @@ body.landing-shell::before {
     color: var(--teal);
 }
 
+.brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.brand-logo-image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+}
+
+.brand-logo-image--nav {
+    height: 3.35rem;
+}
+
+.brand-logo-image--landing {
+    height: clamp(3.4rem, 8.4vw, 5rem);
+}
+
 .nav-button {
     color: var(--muted);
     border: 1px solid transparent;
@@ -299,6 +319,11 @@ body.landing-shell::before {
     color: #fff;
 }
 
+.auth-brand-logo {
+    height: clamp(3.25rem, 10vw, 4.5rem);
+    width: auto;
+}
+
 .demo-panel {
     border: 1px solid rgba(15, 139, 141, 0.12);
     background: rgba(15, 139, 141, 0.08);
@@ -324,6 +349,70 @@ body.landing-shell::before {
 .page-grid {
     display: grid;
     gap: 2rem;
+}
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.settings-sidebar {
+    position: sticky;
+    top: 5.75rem;
+}
+
+.settings-nav {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.settings-nav-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.95rem 1rem;
+    border-radius: 1.2rem;
+    border: 1px solid rgba(18, 52, 77, 0.08);
+    background: rgba(255, 255, 255, 0.72);
+    transition: border-color 0.24s ease, background-color 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.settings-nav-item:hover {
+    transform: translateY(-1px);
+    border-color: rgba(15, 139, 141, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.settings-nav-item.is-active {
+    background: rgba(15, 139, 141, 0.1);
+    border-color: rgba(15, 139, 141, 0.22);
+    box-shadow: 0 18px 30px rgba(18, 52, 77, 0.08);
+}
+
+.settings-nav-item__title {
+    display: block;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.settings-nav-item__meta {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.settings-content {
+    display: grid;
+}
+
+.settings-panel {
+    min-height: 100%;
+}
+
+.settings-panel__header {
+    margin-bottom: 1.5rem;
 }
 
 .landing-section {
@@ -458,6 +547,18 @@ body.landing-shell::before {
 }
 
 @media (max-width: 768px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-sidebar {
+        position: static;
+    }
+
+    .settings-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .app-navbar .container {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -607,6 +708,22 @@ body.landing-shell::before {
 }
 
 @media (max-width: 640px) {
+    .settings-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-nav-item {
+        padding: 0.85rem 0.9rem;
+    }
+
+    .settings-nav-item__meta {
+        font-size: 0.78rem;
+    }
+
+    .settings-panel__header {
+        margin-bottom: 1.15rem;
+    }
+
     body.app-shell,
     body.auth-shell,
     body.landing-shell {
@@ -640,6 +757,18 @@ body.landing-shell::before {
     .brand-mark {
         font-size: 1.25rem;
         line-height: 0.92;
+    }
+
+    .brand-logo-image--nav {
+        height: 2.8rem;
+    }
+
+    .brand-logo-image--landing {
+        height: 3.5rem;
+    }
+
+    .auth-brand-logo {
+        height: 3.4rem;
     }
 
     .landing-topbar {
@@ -795,6 +924,18 @@ body.landing-shell::before {
     .brand-mark {
         font-size: 0.98rem;
         line-height: 0.9;
+    }
+
+    .brand-logo-image--nav {
+        height: 2.4rem;
+    }
+
+    .brand-logo-image--landing {
+        height: 2.9rem;
+    }
+
+    .auth-brand-logo {
+        height: 2.9rem;
     }
 
     .landing-topbar {

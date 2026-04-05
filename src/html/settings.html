@@ -6,6 +6,7 @@
     <title>Settings | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="../assets/budgeting-buddy-mark.svg" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="../js/auth.js"></script>
     <script src="../js/dataManager.js"></script>
@@ -27,78 +28,115 @@
             <p class="text-white/75 text-lg">Customize your budgeting experience and manage account details.</p>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="1">
-                <h2 class="section-heading text-3xl mb-2">Currency Preference</h2>
-                <p class="text-gray-600 mb-4">Choose your preferred currency for all transactions</p>
-                <label for="currency" class="block font-medium mb-1">Default Currency</label>
-                <select id="currency" class="form-select mb-4">
-                    <option value="USD">$ US Dollar</option>
-                    <option value="EUR">&euro; Euro</option>
-                    <option value="GBP">&pound; British Pound</option>
-                    <option value="CAD">C$ Canadian Dollar</option>
-                    <option value="AUD">A$ Australian Dollar</option>
-                    <option value="JPY">&yen; Japanese Yen</option>
-                    <option value="PHP">&#8369; Philippine Peso</option>
-                    <option value="SGD">S$ Singapore Dollar</option>
-                    <option value="CNY">&yen; Chinese Yuan</option>
-                    <option value="KRW">&#8361; South Korean Won</option>
-                    <option value="INR">&#8377; Indian Rupee</option>
-                </select>
-                <div class="p-4 bg-slate-100/80 rounded-[1.4rem] border border-slate-200">
-                    <p class="text-sm text-slate-700">
-                        <strong>Current Currency:</strong>
-                        <span id="current-currency">US Dollar (USD)</span>
-                    </p>
-                    <p class="text-xs text-slate-600 mt-1">
-                        This will be applied to all new transactions and display formats.
-                    </p>
+        <div class="settings-layout reveal">
+            <aside class="surface-panel rounded-[1.8rem] p-4 md:p-5 settings-sidebar" data-delay="1">
+                <p class="eyebrow text-slate-500 mb-4">Options</p>
+                <div class="settings-nav" role="tablist" aria-label="Settings sections">
+                    <button type="button" class="settings-nav-item is-active" data-settings-target="currency-panel" role="tab" aria-selected="true">
+                        <span class="settings-nav-item__title">Currency</span>
+                        <span class="settings-nav-item__meta">Default money display</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" data-settings-target="categories-panel" role="tab" aria-selected="false">
+                        <span class="settings-nav-item__title">Categories</span>
+                        <span class="settings-nav-item__meta">Manage expense groups</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" data-settings-target="profile-panel" role="tab" aria-selected="false">
+                        <span class="settings-nav-item__title">Profile</span>
+                        <span class="settings-nav-item__meta">Name and email</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" data-settings-target="data-panel" role="tab" aria-selected="false">
+                        <span class="settings-nav-item__title">Data</span>
+                        <span class="settings-nav-item__meta">Export, import, clear</span>
+                    </button>
+                    <button type="button" class="settings-nav-item" data-settings-target="password-panel" role="tab" aria-selected="false">
+                        <span class="settings-nav-item__title">Password</span>
+                        <span class="settings-nav-item__meta">Change sign-in security</span>
+                    </button>
                 </div>
-            </div>
+            </aside>
 
-            <div class="surface-panel rounded-[1.8rem] p-6 reveal" data-delay="2">
-                <h2 class="section-heading text-3xl mb-2">Expense Categories</h2>
-                <p class="text-gray-600 mb-4">Manage your spending categories</p>
-                <form id="category-form" class="flex gap-2 mb-6">
-                    <input type="text" id="newCategory" placeholder="e.g. Hobbies" class="form-input flex-1" />
-                    <button type="submit" class="primary-button px-5 py-3">Add</button>
-                </form>
-                <div>
-                    <h3 class="font-semibold text-gray-900 mb-2">Current Categories</h3>
-                    <div id="category-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            <section class="settings-content">
+                <div id="currency-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel is-active" role="tabpanel">
+                    <div class="settings-panel__header">
+                        <h2 class="section-heading text-3xl mb-2">Currency Preference</h2>
+                        <p class="text-gray-600">Choose your preferred currency for all transactions.</p>
+                    </div>
+                    <label for="currency" class="block font-medium mb-1">Default Currency</label>
+                    <select id="currency" class="form-select mb-4">
+                        <option value="USD">$ US Dollar</option>
+                        <option value="EUR">&euro; Euro</option>
+                        <option value="GBP">&pound; British Pound</option>
+                        <option value="CAD">C$ Canadian Dollar</option>
+                        <option value="AUD">A$ Australian Dollar</option>
+                        <option value="JPY">&yen; Japanese Yen</option>
+                        <option value="PHP">&#8369; Philippine Peso</option>
+                        <option value="SGD">S$ Singapore Dollar</option>
+                        <option value="CNY">&yen; Chinese Yuan</option>
+                        <option value="KRW">&#8361; South Korean Won</option>
+                        <option value="INR">&#8377; Indian Rupee</option>
+                    </select>
+                    <div class="p-4 bg-slate-100/80 rounded-[1.4rem] border border-slate-200">
+                        <p class="text-sm text-slate-700">
+                            <strong>Current Currency:</strong>
+                            <span id="current-currency">US Dollar (USD)</span>
+                        </p>
+                        <p class="text-xs text-slate-600 mt-1">
+                            This will be applied to all new transactions and display formats.
+                        </p>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="surface-panel rounded-[1.8rem] p-6 mt-8 reveal">
-            <h2 class="section-heading text-3xl mb-2">Account Settings</h2>
-            <p class="text-gray-600 mb-6">Manage your account preferences and data</p>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="font-semibold mb-4">Profile Settings</h3>
+                <div id="categories-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel hidden" role="tabpanel">
+                    <div class="settings-panel__header">
+                        <h2 class="section-heading text-3xl mb-2">Expense Categories</h2>
+                        <p class="text-gray-600">Manage the categories used when you log expenses.</p>
+                    </div>
+                    <form id="category-form" class="flex gap-2 mb-6">
+                        <input type="text" id="newCategory" placeholder="e.g. Hobbies" class="form-input flex-1" />
+                        <button type="submit" class="primary-button px-5 py-3">Add</button>
+                    </form>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Current Categories</h3>
+                        <div id="category-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <div id="profile-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel hidden" role="tabpanel">
+                    <div class="settings-panel__header">
+                        <h2 class="section-heading text-3xl mb-2">Profile Settings</h2>
+                        <p class="text-gray-600">Update the account details shown across the app.</p>
+                    </div>
                     <label for="displayName" class="block font-medium mb-1">Display Name</label>
                     <input id="displayName" type="text" class="form-input mb-4" />
                     <label for="email" class="block font-medium mb-1">Email Address</label>
-                    <input id="email" type="email" class="form-input mb-4" />
-                    <button class="primary-button px-5 py-3 w-full md:w-auto">
+                    <input id="email" type="email" class="form-input mb-5" />
+                    <button id="updateProfileBtn" type="button" class="primary-button px-5 py-3 w-full md:w-auto">
                         Update Profile
                     </button>
                 </div>
 
-                <div>
-                    <h3 class="font-semibold mb-4">Data Management</h3>
-                    <button class="secondary-button w-full px-4 py-3 mb-2">Export Data</button>
-                    <button class="secondary-button w-full px-4 py-3 mb-2">Import Data</button>
-                    <button class="w-full border border-red-300 text-red-600 px-4 py-3 rounded-full hover:bg-red-50 transition">
-                        Clear All Data
-                    </button>
-                    <p class="text-xs text-gray-500 mt-2">
-                        Export your data for backup or import data from other budgeting apps.
+                <div id="data-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel hidden" role="tabpanel">
+                    <div class="settings-panel__header">
+                        <h2 class="section-heading text-3xl mb-2">Data Management</h2>
+                        <p class="text-gray-600">Back up your data, restore it, or clear the workspace.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <button id="exportDataBtn" type="button" class="secondary-button w-full px-4 py-3">Export Data</button>
+                        <button id="importDataBtn" type="button" class="secondary-button w-full px-4 py-3">Import Data</button>
+                        <button id="clearDataBtn" type="button" class="w-full border border-red-300 text-red-600 px-4 py-3 rounded-full hover:bg-red-50 transition">
+                            Clear All Data
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">
+                        Export your data for backup or import data from other Budgeting Buddy workspaces.
                     </p>
                 </div>
 
-                <div>
-                    <h3 class="font-semibold mb-4">Change Password</h3>
+                <div id="password-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel hidden" role="tabpanel">
+                    <div class="settings-panel__header">
+                        <h2 class="section-heading text-3xl mb-2">Change Password</h2>
+                        <p class="text-gray-600">Update your password and keep your account secure.</p>
+                    </div>
                     <form id="change-password-form" class="space-y-3">
                         <label for="currentPassword" class="block font-medium mb-1">Current Password</label>
                         <div class="relative mb-2">
@@ -124,7 +162,7 @@
                         <button type="submit" class="primary-button px-4 py-3 w-full">Submit</button>
                     </form>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 
@@ -149,7 +187,7 @@
             userInfoSection.style.cursor = 'pointer';
             userInfoSection.addEventListener('click', () => {
                 const modal = document.getElementById('profile-modal');
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const userData = window.auth?.getCurrentUser?.() || {};
                 document.getElementById('profile-name').textContent = userData.name || '';
                 document.getElementById('profile-email').textContent = userData.email || '';
                 modal.classList.remove('hidden');

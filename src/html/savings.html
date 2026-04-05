@@ -6,6 +6,7 @@
     <title>Savings Goals | Budgeting Buddy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="../assets/budgeting-buddy-mark.svg" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <script src="../js/auth.js"></script>
     <script src="../js/dataManager.js"></script>
@@ -51,6 +52,13 @@
                     <div>
                         <label for="savedAmount" class="block font-medium">Saved Amount</label>
                         <input id="savedAmount" type="number" class="form-input mt-1" />
+                    </div>
+                    <div>
+                        <label for="initial-budget-month" class="block font-medium">Budget month to deduct from</label>
+                        <select id="initial-budget-month" class="form-select mt-1">
+                            <option value="">Select budget month</option>
+                        </select>
+                        <p id="initial-budget-month-help" class="text-xs text-slate-500 mt-2">Required only when the saved amount is greater than zero.</p>
                     </div>
                     <button type="submit" class="primary-button w-full py-3">Create
                         Goal</button>
@@ -124,7 +132,7 @@
                 ) {
                     const modal = document.getElementById('profile-modal');
                     if (modal) {
-                        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                        const userData = window.auth?.getCurrentUser?.() || {};
                         const nameDiv = document.getElementById('profile-name');
                         const emailDiv = document.getElementById('profile-email');
                         if (nameDiv) nameDiv.textContent = userData.name || '';

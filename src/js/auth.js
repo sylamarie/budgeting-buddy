@@ -8,6 +8,7 @@ function getStoredUser() {
 
 async function apiRequest(url, options = {}) {
     const response = await fetch(url, {
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
             ...(options.headers || {})
@@ -24,7 +25,9 @@ async function apiRequest(url, options = {}) {
 
     if (!response.ok) {
         const message = typeof payload === 'object' && payload?.error ? payload.error : 'Request failed.';
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
     }
 
     return payload;
@@ -164,37 +167,42 @@ window.appUI = appUI;
 
 class Auth {
     constructor() {
-        this.currentUser = null;
-        this.isAuthenticated = false;
-        this.init();
+        this.currentUser = getStoredUser();
+        this.isAuthenticated = Boolean(this.currentUser?.id);
+        this.ready = this.init();
     }
 
-    init() {
-        this.checkAuthStatus();
+    async init() {
         this.setupAuthListeners();
+        await this.checkAuthStatus();
     }
 
-    checkAuthStatus() {
-        const token = localStorage.getItem('authToken');
-        const userData = getStoredUser();
+    async checkAuthStatus() {
+        try {
+            const payload = await apiRequest('/api/auth/session');
+            this.persistSession(payload.user);
+            this.redirectAuthenticatedUser();
+        } catch (error) {
+            this.clearLocalSession();
 
-        if (token && userData?.id) {
-            this.currentUser = userData;
-            this.isAuthenticated = true;
-            this.updateUI();
-        } else {
+            if (error.status !== 401) {
+                console.error('Session check failed:', error);
+            }
+
             this.redirectToLogin();
         }
     }
 
     setupAuthListeners() {
         const loginForm = document.getElementById('login-form');
-        if (loginForm) {
+        if (loginForm && !loginForm.dataset.authBound) {
+            loginForm.dataset.authBound = 'true';
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
 
         const registerForm = document.getElementById('register-form');
-        if (registerForm) {
+        if (registerForm && !registerForm.dataset.authBound) {
+            registerForm.dataset.authBound = 'true';
             registerForm.addEventListener('submit', (e) => this.handleRegister(e));
         }
 
@@ -214,7 +222,7 @@ class Auth {
         try {
             const user = await this.loginUser(email, password);
             this.persistSession(user);
-            window.location.href = '/src/html/dashboard.html';
+            window.location.href = '/dashboard';
         } catch (error) {
             this.showError(error.message || 'Login failed. Please check your credentials.');
         }
@@ -235,7 +243,7 @@ class Auth {
         try {
             const user = await this.registerUser(name, email, password);
             this.persistSession(user);
-            window.location.href = '/src/html/dashboard.html';
+            window.location.href = '/dashboard';
         } catch (error) {
             this.showError(error.message || 'Registration failed. Please try again.');
         }
@@ -262,15 +270,20 @@ class Auth {
     persistSession(user) {
         this.currentUser = user;
         this.isAuthenticated = true;
-        localStorage.setItem('authToken', `session-${Date.now()}`);
         localStorage.setItem('userData', JSON.stringify(user));
         this.updateUI();
     }
 
+    clearLocalSession() {
+        this.currentUser = null;
+        this.isAuthenticated = false;
+        localStorage.removeItem('userData');
+        localStorage.removeItem('appSettings');
+        localStorage.removeItem('cachedSettings');
+    }
+
     updateStoredUser(user) {
-        this.currentUser = user;
-        localStorage.setItem('userData', JSON.stringify(user));
-        this.updateUI();
+        this.persistSession(user);
     }
 
     async logout() {
@@ -283,13 +296,16 @@ class Auth {
 
         if (!confirmed) return;
 
-        this.currentUser = null;
-        this.isAuthenticated = false;
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('appSettings');
-        localStorage.removeItem('cachedSettings');
-        window.location.href = '/index.html';
+        try {
+            await apiRequest('/api/auth/logout', {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+
+        this.clearLocalSession();
+        window.location.href = '/';
     }
 
     redirectToLogin() {
@@ -297,7 +313,16 @@ class Auth {
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
 
         if (protectedPages.includes(currentPage)) {
-            window.location.href = '/src/html/login.html';
+            window.location.href = '/login';
+        }
+    }
+
+    redirectAuthenticatedUser() {
+        const authPages = ['login', 'register'];
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+
+        if (authPages.includes(currentPage)) {
+            window.location.href = '/dashboard';
         }
     }
 

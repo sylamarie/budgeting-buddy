@@ -1,4 +1,11 @@
+const INITIAL_HISTORY_ITEMS = 5;
+let isExpenseHistoryExpanded = false;
+
 document.addEventListener('DOMContentLoaded', async function() {
+    if (window.auth?.ready) {
+        await window.auth.ready;
+    }
+
     if (!auth.isUserLoggedIn()) {
         return;
     }
@@ -8,6 +15,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     await loadExpenseData();
     await populateCategoryDropdown();
+    await populateBudgetMonthDropdown();
+
+    const toggleHistoryBtn = document.getElementById('toggle-expense-history');
+    if (toggleHistoryBtn) {
+        toggleHistoryBtn.addEventListener('click', async () => {
+            isExpenseHistoryExpanded = !isExpenseHistoryExpanded;
+            await loadExpenseData();
+        });
+    }
 
     document.getElementById('expense-form').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -20,6 +36,7 @@ async function loadExpenseData() {
     updateTotalExpenses(expenses);
     displayRecentExpenses(expenses);
     displayAllExpenses(expenses);
+    await populateBudgetMonthDropdown();
 }
 
 function updateTotalExpenses(expenses) {
@@ -35,7 +52,7 @@ function updateTotalExpenses(expenses) {
 
 function displayRecentExpenses(expenses) {
     const recentContainer = document.getElementById('recent-expenses');
-    const recentExpenses = [...expenses].slice(-5).reverse();
+    const recentExpenses = [...expenses].slice(-3).reverse();
 
     if (recentExpenses.length === 0) {
         recentContainer.innerHTML = '<p class="text-gray-500 text-sm">No expense entries yet.</p>';
@@ -47,6 +64,7 @@ function displayRecentExpenses(expenses) {
             <div>
                 <p class="font-semibold text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                 <p class="text-sm text-gray-600">${expense.category} | ${new Date(expense.date).toLocaleDateString()}</p>
+                <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
             </div>
         </div>
     `).join('');
@@ -54,13 +72,20 @@ function displayRecentExpenses(expenses) {
 
 function displayAllExpenses(expenses) {
     const allContainer = document.getElementById('all-expenses');
+    const toggleHistoryBtn = document.getElementById('toggle-expense-history');
 
     if (expenses.length === 0) {
         allContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No expense entries yet. Add your first expense above!</p>';
+        if (toggleHistoryBtn) {
+            toggleHistoryBtn.classList.add('hidden');
+        }
         return;
     }
 
-    allContainer.innerHTML = [...expenses].reverse().map((expense) => `
+    const allHistory = [...expenses].reverse();
+    const visibleHistory = isExpenseHistoryExpanded ? allHistory : allHistory.slice(0, INITIAL_HISTORY_ITEMS);
+
+    allContainer.innerHTML = visibleHistory.map((expense) => `
         <div class="list-card flex justify-between items-center gap-4">
             <div class="flex-1">
                 <div class="flex items-center space-x-3">
@@ -70,6 +95,7 @@ function displayAllExpenses(expenses) {
                     <div>
                         <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                         <p class="text-sm text-gray-600">${expense.category}</p>
+                        <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
                     </div>
                 </div>
             </div>
@@ -88,20 +114,29 @@ function displayAllExpenses(expenses) {
             </div>
         </div>
     `).join('');
+
+    if (toggleHistoryBtn) {
+        const hasMoreItems = allHistory.length > INITIAL_HISTORY_ITEMS;
+        toggleHistoryBtn.classList.toggle('hidden', !hasMoreItems);
+        toggleHistoryBtn.textContent = isExpenseHistoryExpanded
+            ? 'See less'
+            : `See full history (${allHistory.length})`;
+    }
 }
 
 async function addExpense() {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
+    const budgetMonth = document.getElementById('budget-month').value;
 
-    if (!amount || !category || !date) {
+    if (!amount || !category || !date || !budgetMonth) {
         await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        await dataManager.addExpense(amount, category, date);
+        await dataManager.addExpense(amount, category, date, budgetMonth);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetExpenseSubmitButton();
@@ -132,9 +167,11 @@ async function editExpense(id) {
 
     if (!expense) return;
 
+    await populateBudgetMonthDropdown(dataManager.getExpenseBudgetMonth(expense));
     document.getElementById('amount').value = expense.amount;
     document.getElementById('category').value = expense.category;
     document.getElementById('date').value = expense.date;
+    document.getElementById('budget-month').value = dataManager.getExpenseBudgetMonth(expense);
 
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Update Expense';
@@ -150,14 +187,15 @@ async function updateExpense(id) {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
+    const budgetMonth = document.getElementById('budget-month').value;
 
-    if (!amount || !category || !date) {
+    if (!amount || !category || !date || !budgetMonth) {
         await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        await dataManager.updateExpense(id, amount, category, date);
+        await dataManager.updateExpense(id, amount, category, date, budgetMonth);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetExpenseSubmitButton();
@@ -173,6 +211,65 @@ function resetExpenseSubmitButton() {
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Add Expense';
     submitBtn.onclick = null;
+}
+
+async function populateBudgetMonthDropdown(selectedKey = '') {
+    const budgetMonthSelect = document.getElementById('budget-month');
+    const budgetMonthHelp = document.getElementById('budget-month-help');
+    if (!budgetMonthSelect) return;
+
+    const months = await getSelectableBudgetMonths(selectedKey || budgetMonthSelect.value);
+    const existingValue = selectedKey || budgetMonthSelect.value;
+
+    budgetMonthSelect.innerHTML = '<option value="">Select budget month</option>';
+
+    months.forEach((month) => {
+        const option = document.createElement('option');
+        option.value = month.key;
+        option.textContent = `${month.label} (${getCurrencySymbol()}${formatAmount(month.remaining)} left)`;
+        budgetMonthSelect.appendChild(option);
+    });
+
+    if (existingValue && [...budgetMonthSelect.options].some((option) => option.value === existingValue)) {
+        budgetMonthSelect.value = existingValue;
+    }
+
+    if (budgetMonthHelp) {
+        budgetMonthHelp.textContent = months.length
+            ? 'Only months with remaining budget are shown.'
+            : 'No month has remaining budget right now. Add income first or free up an earlier month.';
+    }
+
+    budgetMonthSelect.disabled = months.length === 0;
+}
+
+async function getSelectableBudgetMonths(selectedKey = '') {
+    const months = await dataManager.getAvailableBudgetMonths();
+
+    if (!selectedKey || months.some((month) => month.key === selectedKey)) {
+        return months;
+    }
+
+    const [income, expenses, savings] = await Promise.all([
+        dataManager.getIncome(),
+        dataManager.getExpenses(),
+        dataManager.getSavings()
+    ]);
+    const fallbackMonth = dataManager
+        .getBudgetMonthBreakdown(income, expenses, savings)
+        .find((month) => month.key === selectedKey);
+
+    if (!fallbackMonth) {
+        return months;
+    }
+
+    return [
+        ...months,
+        {
+            ...fallbackMonth,
+            label: `${fallbackMonth.label} (currently assigned)`
+        }
+    ].sort((a, b) => b.key.localeCompare(a.key));
 }
 
 function showMessage(message, type) {

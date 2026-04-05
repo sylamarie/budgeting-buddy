@@ -1,0 +1,21 @@
+<svg width="720" height="210" viewBox="0 0 720 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bb-logo-bg" x1="16" y1="12" x2="150" y2="164" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#12344D"/>
+      <stop offset="1" stop-color="#0F8B8D"/>
+    </linearGradient>
+    <linearGradient id="bb-logo-accent" x1="42" y1="44" x2="106" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AE1D6"/>
+      <stop offset="1" stop-color="#D8FFF8"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="20" width="132" height="132" rx="36" fill="url(#bb-logo-bg)"/>
+  <path d="M45 66C45 57.7157 51.7157 51 60 51H96C104.284 51 111 57.7157 111 66V73H118C124.075 73 129 77.9249 129 84V109C129 119.493 120.493 128 110 128H46C35.5066 128 27 119.493 27 109V84C27 77.9249 31.9249 73 38 73H45V66Z" fill="white" fill-opacity="0.14"/>
+  <path d="M50 68C50 62.4772 54.4772 58 60 58H96C101.523 58 106 62.4772 106 68V73H50V68Z" fill="white" fill-opacity="0.22"/>
+  <path d="M37 86C37 81.5817 40.5817 78 45 78H111C115.418 78 119 81.5817 119 86V109C119 114.523 114.523 119 109 119H47C41.4772 119 37 114.523 37 109V86Z" fill="white" fill-opacity="0.95"/>
+  <path d="M51 100L62 90L73 97L88 82L102 92" stroke="url(#bb-logo-accent)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M98 92H109V81" stroke="url(#bb-logo-accent)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="174" y="82" fill="#12344D" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="700" letter-spacing="-2.2">Budgeting</text>
+  <text x="174" y="137" fill="#0F8B8D" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="700" letter-spacing="-2.2">Buddy</text>
+  <text x="176" y="168" fill="#5A6A77" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="2.8">CALM MONEY CONTROL</text>
+</svg>
