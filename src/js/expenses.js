@@ -284,11 +284,17 @@ function getCurrencySymbol() {
 }
 
 async function populateCategoryDropdown() {
+    const defaultCategories = ['Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Education', 'Other'];
     let categories = [];
     if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
-        categories = await dataManager.getSetting('categories', [
-            'Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Education', 'Other'
-        ]);
+        categories = await dataManager.getSetting(
+            'expenseCategories',
+            await dataManager.getSetting('categories', defaultCategories)
+        );
+    }
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+        categories = [...defaultCategories];
     }
 
     const categorySelect = document.getElementById('category');

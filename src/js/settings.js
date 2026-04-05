@@ -7,19 +7,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataManager.init();
   }
 
+  const defaultExpenseCategories = ['Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'];
+  const defaultIncomeCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Other'];
   let currency = await dataManager.getSetting('currency', 'USD');
-  let categories = await dataManager.getSetting('categories', [
-    'Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'
-  ]);
-  if (!Array.isArray(categories)) {
-    categories = ['Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'];
-  }
+  let expenseCategories = [];
+  let incomeCategories = [];
 
   const currencySelect = document.getElementById('currency');
   const currentCurrencyDisplay = document.getElementById('current-currency');
-  const categoryForm = document.getElementById('category-form');
-  const newCategoryInput = document.getElementById('newCategory');
-  const categoryList = document.getElementById('category-list');
+  const expenseCategoryForm = document.getElementById('expense-category-form');
+  const incomeCategoryForm = document.getElementById('income-category-form');
+  const newExpenseCategoryInput = document.getElementById('newExpenseCategory');
+  const newIncomeCategoryInput = document.getElementById('newIncomeCategory');
+  const expenseCategoryList = document.getElementById('expense-category-list');
+  const incomeCategoryList = document.getElementById('income-category-list');
   const displayNameInput = document.getElementById('displayName');
   const emailInput = document.getElementById('email');
   const settingsNavItems = Array.from(document.querySelectorAll('.settings-nav-item'));
@@ -41,6 +42,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     currencySelect.value = currency;
   }
 
+  function normalizeCategoryList(categories, defaults) {
+    if (!Array.isArray(categories)) {
+      return [...defaults];
+    }
+
+    const normalized = categories
+      .map((category) => String(category || '').trim())
+      .filter(Boolean);
+
+    return [...new Set(normalized)];
+  }
+
+  async function loadExpenseCategories() {
+    const storedExpenseCategories = await dataManager.getSetting('expenseCategories', null);
+    const legacyExpenseCategories = await dataManager.getSetting('categories', null);
+    const hasExplicitExpenseCategories = Array.isArray(storedExpenseCategories);
+    const sourceCategories = hasExplicitExpenseCategories
+      ? storedExpenseCategories
+      : (Array.isArray(legacyExpenseCategories) ? legacyExpenseCategories : defaultExpenseCategories);
+
+    const normalized = normalizeCategoryList(sourceCategories, defaultExpenseCategories);
+
+    if (!hasExplicitExpenseCategories) {
+      await dataManager.saveSetting('expenseCategories', normalized);
+    }
+
+    if (!Array.isArray(legacyExpenseCategories)) {
+      await dataManager.saveSetting('categories', normalized);
+    }
+
+    return normalized;
+  }
+
+  async function loadIncomeCategories() {
+    const storedIncomeCategories = await dataManager.getSetting('incomeCategories', null);
+    const hasExplicitIncomeCategories = Array.isArray(storedIncomeCategories);
+    const normalized = normalizeCategoryList(
+      hasExplicitIncomeCategories ? storedIncomeCategories : defaultIncomeCategories,
+      defaultIncomeCategories
+    );
+
+    if (!hasExplicitIncomeCategories) {
+      await dataManager.saveSetting('incomeCategories', normalized);
+    }
+
+    return normalized;
+  }
+
   function showSettingsPanel(panelId) {
     settingsNavItems.forEach((item) => {
       const isActive = item.dataset.settingsTarget === panelId;
@@ -55,15 +104,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  async function renderCategories() {
-    categories = await dataManager.getSetting('categories', [
-      'Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'
-    ]);
-    if (!Array.isArray(categories)) {
-      categories = ['Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'];
-    }
-
-    categoryList.innerHTML = '';
+  async function renderCategoryList(listElement, categories, onDelete) {
+    listElement.innerHTML = '';
     categories.forEach((cat) => {
       const row = document.createElement('div');
       row.className = 'flex items-center justify-between p-3 bg-white rounded-lg border';
@@ -73,20 +115,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       const delBtn = document.createElement('button');
       delBtn.textContent = 'Delete';
       delBtn.className = 'text-red-600 text-sm border border-red-600 px-3 py-1 rounded hover:bg-red-50';
-      delBtn.onclick = async () => {
-        categories = categories.filter((entry) => entry !== cat);
-        await dataManager.saveSetting('categories', categories);
-
-        let expenses = await dataManager.getExpenses();
-        expenses = expenses.map((expense) => expense.category === cat ? { ...expense, category: 'Uncategorized' } : expense);
-        await dataManager.saveData('expenses', expenses);
-
-        await renderCategories();
-        window.appUI.toast('Category deleted.', 'success');
-      };
+      delBtn.onclick = () => onDelete(cat);
       row.appendChild(name);
       row.appendChild(delBtn);
-      categoryList.appendChild(row);
+      listElement.appendChild(row);
+    });
+  }
+
+  async function renderCategories() {
+    expenseCategories = await loadExpenseCategories();
+    incomeCategories = await loadIncomeCategories();
+
+    await renderCategoryList(expenseCategoryList, expenseCategories, async (cat) => {
+      expenseCategories = expenseCategories.filter((entry) => entry !== cat);
+      await dataManager.saveSetting('expenseCategories', expenseCategories);
+      await dataManager.saveSetting('categories', expenseCategories);
+
+      let expenses = await dataManager.getExpenses();
+      expenses = expenses.map((expense) => expense.category === cat ? { ...expense, category: 'Uncategorized' } : expense);
+      await dataManager.saveData('expenses', expenses);
+
+      await renderCategories();
+      window.appUI.toast('Expense category deleted.', 'success');
+    });
+
+    await renderCategoryList(incomeCategoryList, incomeCategories, async (cat) => {
+      incomeCategories = incomeCategories.filter((entry) => entry !== cat);
+      await dataManager.saveSetting('incomeCategories', incomeCategories);
+
+      let income = await dataManager.getIncome();
+      income = income.map((entry) => entry.category === cat ? { ...entry, category: 'Other' } : entry);
+      await dataManager.saveData('income', income);
+
+      await renderCategories();
+      window.appUI.toast('Income category deleted.', 'success');
     });
   }
 
@@ -98,25 +160,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.dispatchEvent(new Event('currencyChanged'));
   });
 
-  categoryForm.addEventListener('submit', async (e) => {
+  expenseCategoryForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const newCat = newCategoryInput.value.trim();
+    const newCat = newExpenseCategoryInput.value.trim();
     if (!newCat) {
-      await window.appUI.alert('Please enter a category name.', { title: 'Missing category' });
+      await window.appUI.alert('Please enter an expense category name.', { title: 'Missing category' });
       return;
     }
 
-    categories = await dataManager.getSetting('categories', []);
-    if (categories.includes(newCat)) {
+    expenseCategories = await loadExpenseCategories();
+    if (expenseCategories.includes(newCat)) {
       await window.appUI.alert('Category already exists.', { title: 'Duplicate category' });
       return;
     }
 
-    categories.push(newCat);
-    await dataManager.saveSetting('categories', categories);
-    newCategoryInput.value = '';
+    expenseCategories.push(newCat);
+    await dataManager.saveSetting('expenseCategories', expenseCategories);
+    await dataManager.saveSetting('categories', expenseCategories);
+    newExpenseCategoryInput.value = '';
     await renderCategories();
-    window.appUI.toast('Category added successfully.', 'success');
+    window.appUI.toast('Expense category added successfully.', 'success');
+  });
+
+  incomeCategoryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newCat = newIncomeCategoryInput.value.trim();
+    if (!newCat) {
+      await window.appUI.alert('Please enter an income category name.', { title: 'Missing category' });
+      return;
+    }
+
+    incomeCategories = await loadIncomeCategories();
+    if (incomeCategories.includes(newCat)) {
+      await window.appUI.alert('Category already exists.', { title: 'Duplicate category' });
+      return;
+    }
+
+    incomeCategories.push(newCat);
+    await dataManager.saveSetting('incomeCategories', incomeCategories);
+    newIncomeCategoryInput.value = '';
+    await renderCategories();
+    window.appUI.toast('Income category added successfully.', 'success');
   });
 
   if (displayNameInput && emailInput) {

@@ -88,16 +88,28 @@
 
                 <div id="categories-panel" class="surface-panel rounded-[1.8rem] p-6 settings-panel hidden" role="tabpanel">
                     <div class="settings-panel__header">
-                        <h2 class="section-heading text-3xl mb-2">Expense Categories</h2>
-                        <p class="text-gray-600">Manage the categories used when you log expenses.</p>
+                        <h2 class="section-heading text-3xl mb-2">Categories</h2>
+                        <p class="text-gray-600">Manage the categories used when you log expenses and income.</p>
                     </div>
-                    <form id="category-form" class="flex gap-2 mb-6">
-                        <input type="text" id="newCategory" placeholder="e.g. Hobbies" class="form-input flex-1" />
-                        <button type="submit" class="primary-button px-5 py-3">Add</button>
-                    </form>
-                    <div>
-                        <h3 class="font-semibold text-gray-900 mb-2">Current Categories</h3>
-                        <div id="category-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="rounded-[1.4rem] border border-slate-200 bg-white/70 p-5">
+                            <h3 class="font-semibold text-gray-900 mb-2">Expense Categories</h3>
+                            <p class="text-sm text-slate-500 mb-4">Used when logging expenses.</p>
+                            <form id="expense-category-form" class="flex gap-2 mb-5">
+                                <input type="text" id="newExpenseCategory" placeholder="e.g. Utilities" class="form-input flex-1" />
+                                <button type="submit" class="primary-button px-5 py-3">Add</button>
+                            </form>
+                            <div id="expense-category-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+                        </div>
+                        <div class="rounded-[1.4rem] border border-slate-200 bg-white/70 p-5">
+                            <h3 class="font-semibold text-gray-900 mb-2">Income Categories</h3>
+                            <p class="text-sm text-slate-500 mb-4">Used when logging income.</p>
+                            <form id="income-category-form" class="flex gap-2 mb-5">
+                                <input type="text" id="newIncomeCategory" placeholder="e.g. Salary" class="form-input flex-1" />
+                                <button type="submit" class="primary-button px-5 py-3">Add</button>
+                            </form>
+                            <div id="income-category-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+                        </div>
                     </div>
                 </div>
 

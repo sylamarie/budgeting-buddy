@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     dataManager.init();
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    await populateIncomeCategoryDropdown();
     await loadIncomeData();
 
     const toggleHistoryBtn = document.getElementById('toggle-income-history');
@@ -133,6 +134,7 @@ async function addIncome() {
         document.getElementById('income-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetIncomeSubmitButton();
+        await populateIncomeCategoryDropdown();
         await loadIncomeData();
         showMessage('Income added successfully!', 'success');
     } catch (error) {
@@ -187,6 +189,7 @@ async function updateIncome(id) {
         document.getElementById('income-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetIncomeSubmitButton();
+        await populateIncomeCategoryDropdown();
         await loadIncomeData();
         showMessage('Income updated successfully!', 'success');
     } catch (error) {
@@ -198,6 +201,29 @@ function resetIncomeSubmitButton() {
     const submitBtn = document.querySelector('#income-form button[type="submit"]');
     submitBtn.textContent = 'Add Income';
     submitBtn.onclick = null;
+}
+
+async function populateIncomeCategoryDropdown() {
+    const defaultCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Other'];
+    let categories = [];
+    if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
+        categories = await dataManager.getSetting('incomeCategories', defaultCategories);
+    }
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+        categories = [...defaultCategories];
+    }
+
+    const categorySelect = document.getElementById('category');
+    if (!categorySelect) return;
+
+    categorySelect.innerHTML = '<option value="">Select category</option>';
+    categories.forEach((cat) => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+    });
 }
 
 function showMessage(message, type) {
