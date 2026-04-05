@@ -8,7 +8,7 @@ function getStoredUser() {
 
 async function apiRequest(url, options = {}) {
     const response = await fetch(url, {
-        credentials: 'same-origin',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...(options.headers || {})
@@ -221,7 +221,7 @@ class Auth {
 
         try {
             const user = await this.loginUser(email, password);
-            this.persistSession(user);
+            await this.persistSession(user);
             window.location.href = '/dashboard';
         } catch (error) {
             this.showError(error.message || 'Login failed. Please check your credentials.');
@@ -242,7 +242,7 @@ class Auth {
 
         try {
             const user = await this.registerUser(name, email, password);
-            this.persistSession(user);
+            await this.persistSession(user);
             window.location.href = '/dashboard';
         } catch (error) {
             this.showError(error.message || 'Registration failed. Please try again.');
@@ -267,10 +267,11 @@ class Auth {
         return payload.user;
     }
 
-    persistSession(user) {
+    async persistSession(user) {
         this.currentUser = user;
         this.isAuthenticated = true;
         localStorage.setItem('userData', JSON.stringify(user));
+        await this.confirmServerSession();
         this.updateUI();
     }
 
@@ -283,7 +284,32 @@ class Auth {
     }
 
     updateStoredUser(user) {
-        this.persistSession(user);
+        this.currentUser = user;
+        this.isAuthenticated = true;
+        localStorage.setItem('userData', JSON.stringify(user));
+        this.updateUI();
+    }
+
+    async confirmServerSession(retries = 5) {
+        for (let attempt = 0; attempt < retries; attempt += 1) {
+            try {
+                await apiRequest('/api/auth/session', {
+                    headers: {
+                        'Cache-Control': 'no-store'
+                    }
+                });
+                return true;
+            } catch (error) {
+                if (attempt === retries - 1) {
+                    this.clearLocalSession();
+                    throw new Error('Login succeeded but the session was not established. Please try again.');
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+        }
+
+        return false;
     }
 
     async logout() {
