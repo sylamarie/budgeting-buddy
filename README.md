@@ -1,54 +1,70 @@
 # Budgeting Buddy
 
-Budgeting Buddy is a simple web app that helps you track your income, expenses, and savings goals.
+Budgeting Buddy is a budgeting web app for tracking income, expenses, and savings goals in one workspace. It uses MongoDB for persistence and signed server sessions for authentication.
 
 ## Features
 
-- Register and login
-- Add and view income and expense records
-- Set and track savings goals
-- View visual charts of your spending
-- Currency conversion support
-- Mobile-friendly design
+- Account registration, login, logout, profile updates, and password changes
+- Server-authenticated sessions using signed cookies
+- Income tracking with recent entries and expandable full history
+- Expense tracking with recent entries and expandable full history
+- Savings goals with contribution history instead of a single rolling total
+- Monthly budget balance breakdown for income, expenses, savings, and net balance
+- Budget-month assignment for expenses and savings contributions
+- Currency preference support across the app
+- Category management for expenses
+- Data export, import, and workspace reset
+- Responsive landing page, auth screens, dashboard, and settings UI
+- Custom app branding with logo and favicon
 
-## Technologies
+## Stack
 
 - HTML, CSS, JavaScript
 - Express
-- MongoDB
-- Exchange rate API for currency conversion
-- Chart.js for spending graphs
+- MongoDB Node driver
+- MongoDB Atlas
+- Chart.js
+- Render
 
 ## Live Deployment
 
 - Render: `https://budgetingbuddy.onrender.com/`
 
-## Getting Started
+## Local Setup
 
-1. Clone this repo
-2. Run `npm install`
-3. Use MongoDB Atlas or another MongoDB connection string
-4. Set `MONGODB_URI` and `MONGODB_DB`
-5. Run `npm start`
-6. Open `http://localhost:3000`
+1. Clone the repo.
+2. Run `npm install`.
+3. Create a `.env` file or set environment variables in your shell.
+4. Set `MONGODB_URI`, `MONGODB_DB`, and `SESSION_SECRET`.
+5. Run `npm start` or `npm run dev`.
+6. Open `http://localhost:3000`.
 
 ## Environment Variables
 
 ```env
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/?appName=<app-name>
 MONGODB_DB=budgeting-buddy
-PORT=3000
 SESSION_SECRET=replace-this-with-a-long-random-secret
+PORT=3000
+NODE_ENV=development
 ```
+
+## Production Notes
+
+- Set `NODE_ENV=production` in Render.
+- Store `MONGODB_URI`, `MONGODB_DB`, and `SESSION_SECRET` in Render environment variables.
+- If you rotate the MongoDB database user password, update `MONGODB_URI` in Render and redeploy.
+- If you previously exposed a MongoDB password or URI, rotate it in MongoDB Atlas before continuing to use that cluster.
+
+## Demo Account
+
+- A demo account is created automatically in local development only:
+  `demo@example.com` / `demo123`
 
 ## Notes
 
-- Copy `.env.example` values into your shell environment if needed.
-- In local development, a demo account is created automatically on startup:
-  `demo@example.com` / `demo123`
-- If PowerShell blocks `npm`, run `cmd /c npm.cmd start` instead.
-- The app is deployed on Render at `https://budgetingbuddy.onrender.com/`
-- If you previously exposed a MongoDB password or URI, rotate it in MongoDB Atlas and update Render environment variables before redeploying.
+- If PowerShell blocks `npm`, run `cmd /c npm.cmd start`.
+- Dashboard, login, register, settings, income, expenses, and savings routes redirect to the `src/html` pages so relative assets resolve correctly.
 
 ## License
 
