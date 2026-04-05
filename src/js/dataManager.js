@@ -229,11 +229,11 @@ class DataManager {
         return savings.map((goal) => this.normalizeSavingsGoal(goal));
     }
 
-    async addSavingsGoal(goalName, targetAmount, savedAmount = 0, budgetMonth = null) {
+    async addSavingsGoal(goalName, targetAmount, savedAmount = 0, budgetMonth = null, fundingCategory = '') {
         const timestamp = new Date().toISOString();
         const normalizedSavedAmount = Number(savedAmount) || 0;
         const contributions = normalizedSavedAmount !== 0
-            ? [this.createSavingsContribution(normalizedSavedAmount, timestamp, 'initial', budgetMonth || this.getBudgetMonthKey(timestamp))]
+            ? [this.createSavingsContribution(normalizedSavedAmount, timestamp, 'initial', budgetMonth || this.getBudgetMonthKey(timestamp), fundingCategory)]
             : [];
 
         return this.addItem('savings', {
@@ -270,7 +270,7 @@ class DataManager {
         });
     }
 
-    async addSavingsContribution(id, amount, date = new Date().toISOString(), budgetMonth = null) {
+    async addSavingsContribution(id, amount, date = new Date().toISOString(), budgetMonth = null, fundingCategory = '') {
         const goals = await this.getSavings();
         const goal = goals.find((item) => item.id === id);
 
@@ -294,7 +294,7 @@ class DataManager {
 
         const contributions = [
             ...goal.contributions,
-            this.createSavingsContribution(appliedAmount, date, 'contribution', budgetMonth || this.getBudgetMonthKey(date))
+            this.createSavingsContribution(appliedAmount, date, 'contribution', budgetMonth || this.getBudgetMonthKey(date), fundingCategory)
         ];
 
         return this.updateItem('savings', id, {
@@ -462,7 +462,8 @@ class DataManager {
                     amount: Number(entry.amount) || 0,
                     date: entry.date || timestamp,
                     sourceType: entry.sourceType || 'manual',
-                    budgetMonth: entry.budgetMonth || this.getBudgetMonthKey(entry.date || timestamp)
+                    budgetMonth: entry.budgetMonth || this.getBudgetMonthKey(entry.date || timestamp),
+                    fundingCategory: entry.fundingCategory || ''
                 }))
                 .filter((entry) => entry.amount !== 0)
             : [];
@@ -481,12 +482,13 @@ class DataManager {
         };
     }
 
-    createSavingsContribution(amount, date, sourceType = 'manual', budgetMonth = null) {
+    createSavingsContribution(amount, date, sourceType = 'manual', budgetMonth = null, fundingCategory = '') {
         return {
             amount: Number(amount) || 0,
             date: date || new Date().toISOString(),
             sourceType,
-            budgetMonth: budgetMonth || this.getBudgetMonthKey(date || new Date().toISOString())
+            budgetMonth: budgetMonth || this.getBudgetMonthKey(date || new Date().toISOString()),
+            fundingCategory
         };
     }
 

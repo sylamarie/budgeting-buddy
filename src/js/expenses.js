@@ -1,5 +1,7 @@
 const INITIAL_HISTORY_ITEMS = 5;
 let isExpenseHistoryExpanded = false;
+let fundingCategoryBreakdown = new Map();
+let currentEditingExpenseId = null;
 
 document.addEventListener('DOMContentLoaded', async function() {
     if (window.auth?.ready) {
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await populateCategoryDropdown();
     await populateBudgetMonthDropdown();
     await populateFundingCategoryDropdown();
+    updateFundingCategoryHelper();
 
     const toggleHistoryBtn = document.getElementById('toggle-expense-history');
     if (toggleHistoryBtn) {
@@ -30,6 +33,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         e.preventDefault();
         addExpense();
     });
+
+    const amountInput = document.getElementById('amount');
+    const fundingCategorySelect = document.getElementById('funding-category');
+    const budgetMonthSelect = document.getElementById('budget-month');
+    if (amountInput) {
+        amountInput.addEventListener('input', () => updateFundingCategoryHelper());
+    }
+    if (fundingCategorySelect) {
+        fundingCategorySelect.addEventListener('change', () => updateFundingCategoryHelper());
+    }
+    if (budgetMonthSelect) {
+        budgetMonthSelect.addEventListener('change', async () => {
+            await populateFundingCategoryDropdown(fundingCategorySelect?.value || '');
+        });
+    }
 });
 
 async function loadExpenseData() {
@@ -143,10 +161,12 @@ async function addExpense() {
         await dataManager.addExpense(amount, category, date, budgetMonth, fundingCategory);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        currentEditingExpenseId = null;
         resetExpenseSubmitButton();
         await loadExpenseData();
         await populateCategoryDropdown();
         await populateFundingCategoryDropdown();
+        updateFundingCategoryHelper();
         showMessage('Expense added successfully!', 'success');
     } catch (error) {
         showMessage(error.message || 'Failed to add expense. Please try again.', 'error');
@@ -172,6 +192,7 @@ async function editExpense(id) {
 
     if (!expense) return;
 
+    currentEditingExpenseId = id;
     await populateBudgetMonthDropdown(dataManager.getExpenseBudgetMonth(expense));
     await populateFundingCategoryDropdown(expense.fundingCategory || '');
     document.getElementById('amount').value = expense.amount;
@@ -179,6 +200,7 @@ async function editExpense(id) {
     document.getElementById('date').value = expense.date;
     document.getElementById('budget-month').value = dataManager.getExpenseBudgetMonth(expense);
     document.getElementById('funding-category').value = expense.fundingCategory || '';
+    updateFundingCategoryHelper();
 
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Update Expense';
@@ -206,10 +228,12 @@ async function updateExpense(id) {
         await dataManager.updateExpense(id, amount, category, date, budgetMonth, fundingCategory);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        currentEditingExpenseId = null;
         resetExpenseSubmitButton();
         await loadExpenseData();
         await populateCategoryDropdown();
         await populateFundingCategoryDropdown();
+        updateFundingCategoryHelper();
         showMessage('Expense updated successfully!', 'success');
     } catch (error) {
         showMessage(error.message || 'Failed to update expense. Please try again.', 'error');
@@ -217,9 +241,11 @@ async function updateExpense(id) {
 }
 
 function resetExpenseSubmitButton() {
+    currentEditingExpenseId = null;
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Add Expense';
     submitBtn.onclick = null;
+    updateFundingCategoryHelper();
 }
 
 async function populateBudgetMonthDropdown(selectedKey = '') {
@@ -333,21 +359,86 @@ async function populateFundingCategoryDropdown(selectedValue = '') {
     if (selectedValue && !normalizedCategories.includes(selectedValue)) {
         normalizedCategories.push(selectedValue);
     }
+    const selectedBudgetMonth = document.getElementById('budget-month')?.value || '';
+    fundingCategoryBreakdown = await getFundingCategoryBreakdown(
+        normalizedCategories,
+        selectedBudgetMonth,
+        currentEditingExpenseId
+    );
 
     const fundingCategorySelect = document.getElementById('funding-category');
     if (!fundingCategorySelect) return;
 
     fundingCategorySelect.innerHTML = '<option value="">Select money source</option>';
     normalizedCategories.forEach((category) => {
+        const breakdown = fundingCategoryBreakdown.get(category) || { remaining: 0 };
         const option = document.createElement('option');
         option.value = category;
-        option.textContent = category;
+        option.textContent = selectedBudgetMonth
+            ? `${category} (${getCurrencySymbol()}${formatAmount(breakdown.remaining)} left in ${dataManager.formatBudgetMonthLabel(selectedBudgetMonth)})`
+            : `${category} (${getCurrencySymbol()}${formatAmount(breakdown.remaining)} left)`;
         fundingCategorySelect.appendChild(option);
     });
 
     if (selectedValue) {
         fundingCategorySelect.value = selectedValue;
     }
+
+    updateFundingCategoryHelper();
+}
+
+async function getFundingCategoryBreakdown(categories, budgetMonthKey = '', excludeExpenseId = null) {
+    const [income, expenses] = await Promise.all([
+        dataManager.getIncome(),
+        dataManager.getExpenses()
+    ]);
+
+    return categories.reduce((breakdownMap, category) => {
+        const incomeTotal = income
+            .filter((entry) => !budgetMonthKey || dataManager.getBudgetMonthKey(entry.date) === budgetMonthKey)
+            .filter((entry) => entry.category === category)
+            .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+        const expenseTotal = expenses
+            .filter((entry) => !excludeExpenseId || entry.id !== excludeExpenseId)
+            .filter((entry) => !budgetMonthKey || dataManager.getExpenseBudgetMonth(entry) === budgetMonthKey)
+            .filter((entry) => entry.fundingCategory === category)
+            .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+
+        breakdownMap.set(category, {
+            income: incomeTotal,
+            used: expenseTotal,
+            remaining: incomeTotal - expenseTotal
+        });
+        return breakdownMap;
+    }, new Map());
+}
+
+function updateFundingCategoryHelper() {
+    const fundingCategorySelect = document.getElementById('funding-category');
+    const fundingCategoryHelp = document.getElementById('funding-category-help');
+    const amountInput = document.getElementById('amount');
+    const budgetMonthSelect = document.getElementById('budget-month');
+
+    if (!fundingCategorySelect || !fundingCategoryHelp) {
+        return;
+    }
+
+    const selectedBudgetMonth = budgetMonthSelect?.value || '';
+    if (!selectedBudgetMonth) {
+        fundingCategoryHelp.textContent = 'Select a budget month first.';
+        return;
+    }
+
+    const selectedCategory = fundingCategorySelect.value;
+    if (!selectedCategory) {
+        fundingCategoryHelp.textContent = 'Choose a money source.';
+        return;
+    }
+
+    const breakdown = fundingCategoryBreakdown.get(selectedCategory) || { income: 0, used: 0, remaining: 0 };
+    const plannedExpenseAmount = Number(amountInput?.value) || 0;
+    const remainingAfterExpense = breakdown.remaining - plannedExpenseAmount;
+    fundingCategoryHelp.textContent = `After this expense, you will have ${getCurrencySymbol()}${formatAmount(remainingAfterExpense)} left in ${selectedCategory}.`;
 }
 
 function formatAmount(amount) {
