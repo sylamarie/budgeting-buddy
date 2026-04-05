@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const defaultExpenseCategories = ['Food', 'Transportation', 'Rent', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping'];
-  const defaultIncomeCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Other'];
+  const defaultIncomeCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Bank', 'Other'];
   let currency = await dataManager.getSetting('currency', 'USD');
   let expenseCategories = [];
   let incomeCategories = [];

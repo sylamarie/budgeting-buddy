@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadExpenseData();
     await populateCategoryDropdown();
     await populateBudgetMonthDropdown();
+    await populateFundingCategoryDropdown();
 
     const toggleHistoryBtn = document.getElementById('toggle-expense-history');
     if (toggleHistoryBtn) {
@@ -64,6 +65,7 @@ function displayRecentExpenses(expenses) {
             <div>
                 <p class="font-semibold text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                 <p class="text-sm text-gray-600">${expense.category} | ${new Date(expense.date).toLocaleDateString()}</p>
+                <p class="text-xs text-slate-500">Paid from: ${expense.fundingCategory || 'Not set'}</p>
                 <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
             </div>
         </div>
@@ -95,6 +97,7 @@ function displayAllExpenses(expenses) {
                     <div>
                         <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                         <p class="text-sm text-gray-600">${expense.category}</p>
+                        <p class="text-xs text-slate-500">Paid from: ${expense.fundingCategory || 'Not set'}</p>
                         <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
                     </div>
                 </div>
@@ -129,19 +132,21 @@ async function addExpense() {
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
     const budgetMonth = document.getElementById('budget-month').value;
+    const fundingCategory = document.getElementById('funding-category').value;
 
-    if (!amount || !category || !date || !budgetMonth) {
+    if (!amount || !category || !date || !budgetMonth || !fundingCategory) {
         await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        await dataManager.addExpense(amount, category, date, budgetMonth);
+        await dataManager.addExpense(amount, category, date, budgetMonth, fundingCategory);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetExpenseSubmitButton();
         await loadExpenseData();
         await populateCategoryDropdown();
+        await populateFundingCategoryDropdown();
         showMessage('Expense added successfully!', 'success');
     } catch (error) {
         showMessage(error.message || 'Failed to add expense. Please try again.', 'error');
@@ -168,10 +173,12 @@ async function editExpense(id) {
     if (!expense) return;
 
     await populateBudgetMonthDropdown(dataManager.getExpenseBudgetMonth(expense));
+    await populateFundingCategoryDropdown(expense.fundingCategory || '');
     document.getElementById('amount').value = expense.amount;
     document.getElementById('category').value = expense.category;
     document.getElementById('date').value = expense.date;
     document.getElementById('budget-month').value = dataManager.getExpenseBudgetMonth(expense);
+    document.getElementById('funding-category').value = expense.fundingCategory || '';
 
     const submitBtn = document.querySelector('#expense-form button[type="submit"]');
     submitBtn.textContent = 'Update Expense';
@@ -188,19 +195,21 @@ async function updateExpense(id) {
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
     const budgetMonth = document.getElementById('budget-month').value;
+    const fundingCategory = document.getElementById('funding-category').value;
 
-    if (!amount || !category || !date || !budgetMonth) {
+    if (!amount || !category || !date || !budgetMonth || !fundingCategory) {
         await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
         return;
     }
 
     try {
-        await dataManager.updateExpense(id, amount, category, date, budgetMonth);
+        await dataManager.updateExpense(id, amount, category, date, budgetMonth, fundingCategory);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         resetExpenseSubmitButton();
         await loadExpenseData();
         await populateCategoryDropdown();
+        await populateFundingCategoryDropdown();
         showMessage('Expense updated successfully!', 'success');
     } catch (error) {
         showMessage(error.message || 'Failed to update expense. Please try again.', 'error');
@@ -307,6 +316,38 @@ async function populateCategoryDropdown() {
         opt.textContent = cat;
         categorySelect.appendChild(opt);
     });
+}
+
+async function populateFundingCategoryDropdown(selectedValue = '') {
+    const defaultFundingCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Bank', 'Other'];
+    let categories = [];
+    if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
+        categories = await dataManager.getSetting('incomeCategories', defaultFundingCategories);
+    }
+
+    if (!Array.isArray(categories) || categories.length === 0) {
+        categories = [...defaultFundingCategories];
+    }
+
+    const normalizedCategories = [...new Set(categories.map((category) => String(category || '').trim()).filter(Boolean))];
+    if (selectedValue && !normalizedCategories.includes(selectedValue)) {
+        normalizedCategories.push(selectedValue);
+    }
+
+    const fundingCategorySelect = document.getElementById('funding-category');
+    if (!fundingCategorySelect) return;
+
+    fundingCategorySelect.innerHTML = '<option value="">Select money source</option>';
+    normalizedCategories.forEach((category) => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        fundingCategorySelect.appendChild(option);
+    });
+
+    if (selectedValue) {
+        fundingCategorySelect.value = selectedValue;
+    }
 }
 
 function formatAmount(amount) {

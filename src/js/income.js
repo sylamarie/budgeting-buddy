@@ -204,7 +204,7 @@ function resetIncomeSubmitButton() {
 }
 
 async function populateIncomeCategoryDropdown() {
-    const defaultCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Other'];
+    const defaultCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Bank', 'Other'];
     let categories = [];
     if (typeof dataManager !== 'undefined' && typeof dataManager.getSetting === 'function') {
         categories = await dataManager.getSetting('incomeCategories', defaultCategories);
