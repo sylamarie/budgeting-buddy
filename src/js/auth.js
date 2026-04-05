@@ -173,8 +173,19 @@ class Auth {
     }
 
     async init() {
+        await this.waitForDomReady();
         this.setupAuthListeners();
         await this.checkAuthStatus();
+    }
+
+    async waitForDomReady() {
+        if (document.readyState !== 'loading') {
+            return;
+        }
+
+        await new Promise((resolve) => {
+            document.addEventListener('DOMContentLoaded', resolve, { once: true });
+        });
     }
 
     async checkAuthStatus() {

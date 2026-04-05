@@ -614,6 +614,7 @@ getDb()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      console.log(`Local app: http://localhost:${PORT}`);
       console.log(`MongoDB database: ${MONGODB_DB}`);
     });
   })
