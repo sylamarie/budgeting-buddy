@@ -370,9 +370,11 @@ class Auth {
         const userInfo = document.getElementById('user-info');
         if (userInfo) {
             userInfo.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm text-gray-700">Welcome, ${user.name}</span>
-                    <button class="logout-btn text-sm text-red-600 hover:text-red-800">Logout</button>
+                <div class="user-chip__identity">
+                    <div class="avatar-badge user-chip__avatar w-8 h-8 rounded-full flex items-center justify-center">
+                        <span class="text-sm font-medium" id="user-initials">${user.name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</span>
+                    </div>
+                    <span class="user-chip__name text-sm text-gray-700" id="user-name">${user.name}</span>
                 </div>
             `;
         }

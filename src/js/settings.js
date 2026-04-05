@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const settingsNavItems = Array.from(document.querySelectorAll('.settings-nav-item'));
   const settingsPanels = Array.from(document.querySelectorAll('.settings-panel'));
   const updateProfileBtn = document.getElementById('updateProfileBtn');
+  const logoutFromSettingsBtn = document.getElementById('logoutFromSettingsBtn');
   const exportBtn = document.getElementById('exportDataBtn');
   const importBtn = document.getElementById('importDataBtn');
   const clearBtn = document.getElementById('clearDataBtn');
@@ -181,6 +182,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (cleared) {
         window.appUI.toast('All data cleared.', 'success');
         location.reload();
+      }
+    };
+  }
+
+  if (logoutFromSettingsBtn) {
+    logoutFromSettingsBtn.onclick = async () => {
+      if (window.auth && typeof window.auth.logout === 'function') {
+        await window.auth.logout();
       }
     };
   }
