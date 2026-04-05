@@ -574,35 +574,35 @@ app.delete('/api/me/:type/:id', requireAuth, async (req, res) => {
 });
 
 app.get('/navbar.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'navbar.html'));
+  res.redirect('/src/html/navbar.html');
 });
 
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'dashboard.html'));
+  res.redirect('/src/html/dashboard.html');
 });
 
 app.get('/income', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'income.html'));
+  res.redirect('/src/html/income.html');
 });
 
 app.get('/expenses', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'expenses.html'));
+  res.redirect('/src/html/expenses.html');
 });
 
 app.get('/savings', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'savings.html'));
+  res.redirect('/src/html/savings.html');
 });
 
 app.get('/settings', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'settings.html'));
+  res.redirect('/src/html/settings.html');
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'login.html'));
+  res.redirect('/src/html/login.html');
 });
 
 app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'html', 'register.html'));
+  res.redirect('/src/html/register.html');
 });
 
 app.get(/.*/, (req, res) => {

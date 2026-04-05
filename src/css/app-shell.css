@@ -147,10 +147,44 @@ body.landing-shell::before {
 }
 
 .user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     background: rgba(255, 255, 255, 0.62);
     border: 1px solid rgba(18, 52, 77, 0.08);
     border-radius: 9999px;
-    padding: 0.35rem 0.55rem;
+    padding: 0.32rem 0.38rem 0.32rem 0.5rem;
+    box-shadow: 0 10px 28px rgba(18, 52, 77, 0.06);
+}
+
+.user-chip__identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+}
+
+.user-chip__avatar {
+    flex-shrink: 0;
+}
+
+.user-chip__name {
+    font-weight: 600;
+    color: var(--navy);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.user-chip__logout {
+    padding: 0.55rem 0.9rem;
+    font-weight: 600;
+    color: #c94b52;
+    line-height: 1;
+}
+
+.user-chip__logout:hover {
+    color: #ad313b;
+    background: rgba(217, 108, 117, 0.1);
 }
 
 .avatar-badge {
