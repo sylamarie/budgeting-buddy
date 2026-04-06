@@ -400,9 +400,10 @@ async function populateFundingCategoryDropdown(selectedValue = '') {
 }
 
 async function getFundingCategoryBreakdown(categories, budgetMonthKey = '', excludeExpenseId = null) {
-    const [income, expenses] = await Promise.all([
+    const [income, expenses, savings] = await Promise.all([
         dataManager.getIncome(),
-        dataManager.getExpenses()
+        dataManager.getExpenses(),
+        dataManager.getSavings()
     ]);
 
     return categories.reduce((breakdownMap, category) => {
@@ -415,11 +416,16 @@ async function getFundingCategoryBreakdown(categories, budgetMonthKey = '', excl
             .filter((entry) => !budgetMonthKey || dataManager.getExpenseBudgetMonth(entry) === budgetMonthKey)
             .filter((entry) => entry.fundingCategory === category)
             .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+        const savingsTotal = savings
+            .flatMap((goal) => goal.contributions || [])
+            .filter((entry) => !budgetMonthKey || (entry.budgetMonth || dataManager.getBudgetMonthKey(entry.date)) === budgetMonthKey)
+            .filter((entry) => entry.fundingCategory === category)
+            .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
 
         breakdownMap.set(category, {
             income: incomeTotal,
-            used: expenseTotal,
-            remaining: incomeTotal - expenseTotal
+            used: expenseTotal + savingsTotal,
+            remaining: incomeTotal - expenseTotal - savingsTotal
         });
         return breakdownMap;
     }, new Map());
