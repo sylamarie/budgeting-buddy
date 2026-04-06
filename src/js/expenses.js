@@ -157,6 +157,12 @@ async function addExpense() {
         return;
     }
 
+    const availableAmount = getFundingCategoryRemaining(fundingCategory);
+    if (Number(amount) > availableAmount) {
+        await window.appUI.alert(`There is not enough money left in ${fundingCategory} for this expense. Choose another source or enter a smaller amount.`, { title: 'Not enough balance' });
+        return;
+    }
+
     try {
         await dataManager.addExpense(amount, category, date, budgetMonth, fundingCategory);
         document.getElementById('expense-form').reset();
@@ -221,6 +227,12 @@ async function updateExpense(id) {
 
     if (!amount || !category || !date || !budgetMonth || !fundingCategory) {
         await window.appUI.alert('Please fill in all fields.', { title: 'Missing details' });
+        return;
+    }
+
+    const availableAmount = getFundingCategoryRemaining(fundingCategory);
+    if (Number(amount) > availableAmount) {
+        await window.appUI.alert(`There is not enough money left in ${fundingCategory} for this expense. Choose another source or enter a smaller amount.`, { title: 'Not enough balance' });
         return;
     }
 
@@ -438,7 +450,15 @@ function updateFundingCategoryHelper() {
     const breakdown = fundingCategoryBreakdown.get(selectedCategory) || { income: 0, used: 0, remaining: 0 };
     const plannedExpenseAmount = Number(amountInput?.value) || 0;
     const remainingAfterExpense = breakdown.remaining - plannedExpenseAmount;
+    if (plannedExpenseAmount > breakdown.remaining) {
+        fundingCategoryHelp.textContent = `There is not enough money left in ${selectedCategory} for this expense. Choose another source or enter a smaller amount.`;
+        return;
+    }
     fundingCategoryHelp.textContent = `After this expense, you will have ${getCurrencySymbol()}${formatAmount(remainingAfterExpense)} left in ${selectedCategory}.`;
+}
+
+function getFundingCategoryRemaining(category) {
+    return Number(fundingCategoryBreakdown.get(category)?.remaining || 0);
 }
 
 function formatAmount(amount) {

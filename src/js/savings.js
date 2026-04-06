@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const savedAmountInput = document.getElementById('savedAmount');
   const initialFundingCategorySelect = document.getElementById('initial-funding-category');
   let editingGoalId = null;
-  let savingsFundingBreakdown = new Map();
 
   async function updateStats() {
     const goals = await dataManager.getSavings();
@@ -101,6 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('savedAmount').value = savedAmount;
         editingGoalId = goal.id;
         form.querySelector("button[type='submit']").textContent = 'Update Goal';
+        populateSavingsEditAllocation(goal);
       });
 
       const addBtn = container.querySelector('.add-btn');
@@ -142,7 +142,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
           }
 
+          const availableAmount = getSavingsFundingCategoryRemaining(fundingCategorySelect, fundingCategory);
+          if (addAmount > availableAmount) {
+            await window.appUI.alert(`There is not enough money left in ${fundingCategory} for this savings amount. Choose another source or enter a smaller amount.`, { title: 'Not enough balance' });
+            return;
+          }
+
           await dataManager.addSavingsContribution(goal.id, addAmount, new Date().toISOString(), budgetMonth, fundingCategory);
+          await populateInitialBudgetMonthSelect();
+          await updateInitialBudgetMonthState();
+          await populateInitialFundingCategorySelect();
+          await updateInitialFundingCategoryState();
           await renderGoals();
           await updateStats();
         });
@@ -165,13 +175,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    if (!editingGoalId && saved > 0 && (!initialBudgetMonth || !initialFundingCategory)) {
+    if (saved > 0 && (!initialBudgetMonth || !initialFundingCategory)) {
       await window.appUI.alert('Choose which budget month and money source should absorb this saved amount.', { title: 'Missing details' });
       return;
     }
 
+    if (saved > 0) {
+      const availableAmount = getSavingsFundingCategoryRemaining(document.getElementById('initial-funding-category'), initialFundingCategory);
+      if (saved > availableAmount) {
+        await window.appUI.alert(`There is not enough money left in ${initialFundingCategory} for this savings amount. Choose another source or enter a smaller amount.`, { title: 'Not enough balance' });
+        return;
+      }
+    }
+
     if (editingGoalId) {
-      await dataManager.updateSavingsGoal(editingGoalId, name, target, saved);
+      await dataManager.updateSavingsGoal(editingGoalId, name, target, saved, initialBudgetMonth, initialFundingCategory);
       editingGoalId = null;
       form.querySelector("button[type='submit']").textContent = 'Create Goal';
     } else {
@@ -180,7 +198,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     form.reset();
     form.querySelector("button[type='submit']").textContent = 'Create Goal';
+    await populateInitialBudgetMonthSelect();
     await updateInitialBudgetMonthState();
+    await populateInitialFundingCategorySelect();
+    await updateInitialFundingCategoryState();
     await renderGoals();
     await updateStats();
   });
@@ -225,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const note = document.getElementById('initial-budget-month-help');
     if (!select) return;
 
-    await populateBudgetMonthSelect(select, note, selectedKey);
+    await populateBudgetMonthSelect(select, note, selectedKey, editingGoalId);
   }
 
   async function updateInitialBudgetMonthState() {
@@ -256,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const budgetMonth = document.getElementById('initial-budget-month')?.value || '';
     if (!select) return;
 
-    await populateSavingsFundingCategorySelect(select, note, budgetMonth, selectedValue);
+    await populateSavingsFundingCategorySelect(select, note, budgetMonth, selectedValue, editingGoalId);
   }
 
   async function updateInitialFundingCategoryState() {
@@ -285,12 +306,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const amount = Number(savedAmountInput?.value || 0);
     updateSavingsFundingHelper(note, selectedCategory, budgetMonth, amount);
   }
+
+  async function populateSavingsEditAllocation(goal) {
+    const latestAllocation = getLatestSavingsAllocation(goal);
+    await populateInitialBudgetMonthSelect(latestAllocation.budgetMonth);
+    document.getElementById('initial-budget-month').value = latestAllocation.budgetMonth || '';
+    await populateInitialFundingCategorySelect(latestAllocation.fundingCategory);
+    document.getElementById('initial-funding-category').value = latestAllocation.fundingCategory || '';
+    await updateInitialBudgetMonthState();
+    await updateInitialFundingCategoryState();
+  }
 });
 
-async function populateBudgetMonthSelect(select, noteElement, selectedKey = '') {
+async function populateBudgetMonthSelect(select, noteElement, selectedKey = '', excludeSavingsGoalId = null) {
   if (!select) return;
 
-  const months = await getSelectableBudgetMonths(selectedKey || select.value);
+  const months = await getSelectableBudgetMonths(selectedKey || select.value, excludeSavingsGoalId);
   const existingValue = selectedKey || select.value;
 
   select.innerHTML = '<option value="">Select budget month</option>';
@@ -313,20 +344,24 @@ async function populateBudgetMonthSelect(select, noteElement, selectedKey = '') 
   }
 }
 
-async function getSelectableBudgetMonths(selectedKey = '') {
-  const months = await dataManager.getAvailableBudgetMonths();
-
-  if (!selectedKey || months.some((month) => month.key === selectedKey)) {
-    return months;
-  }
-
+async function getSelectableBudgetMonths(selectedKey = '', excludeSavingsGoalId = null) {
   const [income, expenses, savings] = await Promise.all([
     dataManager.getIncome(),
     dataManager.getExpenses(),
     dataManager.getSavings()
   ]);
+  const savingsForAvailability = excludeSavingsGoalId
+    ? savings.map((goal) => goal.id === excludeSavingsGoalId ? { ...goal, contributions: [], savedAmount: 0 } : goal)
+    : savings;
+  const months = dataManager.getBudgetMonthBreakdown(income, expenses, savingsForAvailability)
+    .filter((month) => month.income > 0 && month.remaining > 0);
+
+  if (!selectedKey || months.some((month) => month.key === selectedKey)) {
+    return months;
+  }
+
   const fallbackMonth = dataManager
-    .getBudgetMonthBreakdown(income, expenses, savings)
+    .getBudgetMonthBreakdown(income, expenses, savingsForAvailability)
     .find((month) => month.key === selectedKey);
 
   if (!fallbackMonth) {
@@ -342,7 +377,7 @@ async function getSelectableBudgetMonths(selectedKey = '') {
   ].sort((a, b) => b.key.localeCompare(a.key));
 }
 
-async function populateSavingsFundingCategorySelect(select, noteElement, budgetMonth, selectedValue = '') {
+async function populateSavingsFundingCategorySelect(select, noteElement, budgetMonth, selectedValue = '', excludeSavingsGoalId = null) {
   if (!select) return;
 
   const defaultFundingCategories = ['Salary', 'Bonus', 'Freelance', 'Investment', 'Gift', 'Bank', 'Other'];
@@ -360,7 +395,7 @@ async function populateSavingsFundingCategorySelect(select, noteElement, budgetM
     normalizedCategories.push(selectedValue);
   }
 
-  const breakdown = await getSavingsFundingCategoryBreakdown(normalizedCategories, budgetMonth);
+  const breakdown = await getSavingsFundingCategoryBreakdown(normalizedCategories, budgetMonth, excludeSavingsGoalId);
   select.innerHTML = '<option value="">Select money source</option>';
 
   normalizedCategories.forEach((category) => {
@@ -379,12 +414,15 @@ async function populateSavingsFundingCategorySelect(select, noteElement, budgetM
   updateSavingsFundingHelper(noteElement, select.value, budgetMonth, 0);
 }
 
-async function getSavingsFundingCategoryBreakdown(categories, budgetMonth) {
+async function getSavingsFundingCategoryBreakdown(categories, budgetMonth, excludeSavingsGoalId = null) {
   const [income, expenses, savings] = await Promise.all([
     dataManager.getIncome(),
     dataManager.getExpenses(),
     dataManager.getSavings()
   ]);
+  const savingsForAvailability = excludeSavingsGoalId
+    ? savings.map((goal) => goal.id === excludeSavingsGoalId ? { ...goal, contributions: [], savedAmount: 0 } : goal)
+    : savings;
 
   return categories.reduce((map, category) => {
     const incomeTotal = income
@@ -397,7 +435,7 @@ async function getSavingsFundingCategoryBreakdown(categories, budgetMonth) {
       .filter((entry) => entry.fundingCategory === category)
       .reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
 
-    const savingsTotal = savings
+    const savingsTotal = savingsForAvailability
       .flatMap((goal) => goal.contributions || [])
       .filter((entry) => !budgetMonth || (entry.budgetMonth || dataManager.getBudgetMonthKey(entry.date)) === budgetMonth)
       .filter((entry) => entry.fundingCategory === category)
@@ -433,7 +471,42 @@ function updateSavingsFundingHelper(noteElement, selectedCategory, budgetMonth, 
 
   const remaining = Number(remainingLookup[selectedCategory] || 0);
   const remainingAfter = remaining - (Number(amount) || 0);
+  if ((Number(amount) || 0) > remaining) {
+    noteElement.textContent = `There is not enough money left in ${selectedCategory} for this savings amount. Choose another source or enter a smaller amount.`;
+    return;
+  }
   noteElement.textContent = `After this savings, you will have ${getCurrencySymbol()}${formatAmount(remainingAfter)} left in ${selectedCategory}.`;
+}
+
+function getSavingsFundingCategoryRemaining(selectElement, category) {
+  let remainingLookup = {};
+  try {
+    remainingLookup = JSON.parse(selectElement?.dataset.breakdown || '{}');
+  } catch (error) {
+    remainingLookup = {};
+  }
+
+  return Number(remainingLookup[category] || 0);
+}
+
+function getLatestSavingsAllocation(goal) {
+  const contributions = Array.isArray(goal.contributions) ? [...goal.contributions] : [];
+  const positiveContributions = contributions
+    .filter((entry) => Number(entry.amount) > 0)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (!positiveContributions.length) {
+    return {
+      budgetMonth: '',
+      fundingCategory: ''
+    };
+  }
+
+  const latest = positiveContributions[0];
+  return {
+    budgetMonth: latest.budgetMonth || '',
+    fundingCategory: latest.fundingCategory || ''
+  };
 }
 
 function getCurrencySymbol() {

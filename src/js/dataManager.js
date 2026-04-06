@@ -244,7 +244,7 @@ class DataManager {
         });
     }
 
-    async updateSavingsGoal(id, goalName, targetAmount, savedAmount) {
+    async updateSavingsGoal(id, goalName, targetAmount, savedAmount, budgetMonth = null, fundingCategory = '') {
         const goals = await this.getSavings();
         const existingGoal = goals.find((goal) => goal.id === id);
         const normalizedTargetAmount = Number(targetAmount) || 0;
@@ -254,12 +254,38 @@ class DataManager {
             return this.updateItem('savings', id, { goalName, targetAmount: normalizedTargetAmount, savedAmount: normalizedSavedAmount });
         }
 
+        if (budgetMonth && fundingCategory) {
+            const contributions = normalizedSavedAmount > 0
+                ? [this.createSavingsContribution(
+                    normalizedSavedAmount,
+                    new Date().toISOString(),
+                    'edited',
+                    budgetMonth,
+                    fundingCategory
+                )]
+                : [];
+
+            return this.updateItem('savings', id, {
+                goalName,
+                targetAmount: normalizedTargetAmount,
+                savedAmount: normalizedSavedAmount,
+                contributions
+            });
+        }
+
         const currentSavedAmount = this.getSavingsGoalTotal(existingGoal);
         const delta = Number((normalizedSavedAmount - currentSavedAmount).toFixed(2));
         const contributions = [...existingGoal.contributions];
 
         if (delta !== 0) {
-            contributions.push(this.createSavingsContribution(delta, new Date().toISOString(), 'adjustment'));
+            const adjustmentMetadata = this.getSavingsAdjustmentMetadata(existingGoal, delta);
+            contributions.push(this.createSavingsContribution(
+                delta,
+                new Date().toISOString(),
+                'adjustment',
+                adjustmentMetadata.budgetMonth,
+                adjustmentMetadata.fundingCategory
+            ));
         }
 
         return this.updateItem('savings', id, {
@@ -489,6 +515,48 @@ class DataManager {
             sourceType,
             budgetMonth: budgetMonth || this.getBudgetMonthKey(date || new Date().toISOString()),
             fundingCategory
+        };
+    }
+
+    getSavingsAdjustmentMetadata(goal, delta) {
+        const contributions = Array.isArray(goal.contributions) ? [...goal.contributions] : [];
+        const fallbackBudgetMonth = this.getBudgetMonthKey(new Date().toISOString());
+        const defaultMetadata = {
+            budgetMonth: fallbackBudgetMonth,
+            fundingCategory: ''
+        };
+
+        if (!contributions.length) {
+            return defaultMetadata;
+        }
+
+        const normalizedContributions = contributions
+            .map((entry) => ({
+                amount: Number(entry.amount) || 0,
+                date: entry.date || new Date().toISOString(),
+                budgetMonth: entry.budgetMonth || this.getBudgetMonthKey(entry.date),
+                fundingCategory: entry.fundingCategory || ''
+            }))
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const positiveContributions = normalizedContributions.filter((entry) => entry.amount > 0);
+        if (!positiveContributions.length) {
+            return defaultMetadata;
+        }
+
+        const latestPositiveContribution = positiveContributions[0];
+
+        if (delta < 0) {
+            const matchingContribution = positiveContributions.find((entry) => entry.fundingCategory);
+            return {
+                budgetMonth: (matchingContribution || latestPositiveContribution).budgetMonth || fallbackBudgetMonth,
+                fundingCategory: (matchingContribution || latestPositiveContribution).fundingCategory || ''
+            };
+        }
+
+        return {
+            budgetMonth: latestPositiveContribution.budgetMonth || fallbackBudgetMonth,
+            fundingCategory: latestPositiveContribution.fundingCategory || ''
         };
     }
 
