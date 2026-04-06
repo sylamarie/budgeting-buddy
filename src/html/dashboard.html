@@ -33,11 +33,12 @@
                         <h1 class="hero-title text-4xl md:text-6xl mb-3">Take control of your money</h1>
                         <p class="text-white/75 text-lg">Your financial journey starts here</p>
                     </div>
-                    <div class="hero-stat rounded-[1.6rem] px-6 py-5 text-right min-w-[220px]">
+                    <button id="budget-balance-card" type="button" class="hero-stat rounded-[1.6rem] px-6 py-5 text-right min-w-[220px] transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30">
                         <p class="text-white/60 text-sm">Budget Balance</p>
                         <p id="current-balance" class="display-title text-4xl">$0</p>
                         <p class="text-white/60 text-xs mt-2">Calculated from tracked income, expenses, and savings</p>
-                    </div>
+                        <p class="text-white/50 text-[11px] mt-2">Click to view money sources</p>
+                    </button>
                 </div>
             </div>
 
@@ -142,6 +143,15 @@
                 <label class="block text-gray-700 font-medium mb-1">Email</label>
                 <div id="profile-email" class="p-3 bg-slate-100/80 rounded-2xl"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="budget-balance-modal" class="fixed inset-0 bg-slate-950/45 flex items-center justify-center z-50 hidden">
+        <div class="modal-panel rounded-[1.8rem] p-8 w-full max-w-xl relative">
+            <button id="close-budget-balance-modal" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700">&times;</button>
+            <h2 class="section-heading text-3xl mb-2">Budget Balance Sources</h2>
+            <p class="text-sm text-slate-500 mb-4">This shows which money sources still have balance remaining after expenses and savings.</p>
+            <div id="budget-balance-breakdown" class="space-y-3"></div>
         </div>
     </div>
     <script>

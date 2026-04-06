@@ -6,15 +6,16 @@ Budgeting Buddy is a budgeting web app for tracking income, expenses, and saving
 
 - Account registration, login, logout, profile updates, and password changes
 - Server-authenticated sessions using signed cookies
-- Income tracking with recent entries and expandable full history
-- Expense tracking with recent entries and expandable full history
-- Savings goals with contribution history instead of a single rolling total
+- Income tracking with recent entries, expandable full history, and customizable income categories
+- Expense tracking with recent entries, expandable full history, budget-month assignment, and money-source selection
+- Savings goals with contribution history, budget-month assignment, and money-source selection
+- Source-aware balance checks that prevent expenses or savings from using more money than a selected source has left
 - Monthly budget balance breakdown for income, expenses, savings, and net balance
-- Budget-month assignment for expenses and savings contributions
+- Clickable dashboard budget balance card with a breakdown of remaining money by source
 - Currency preference support across the app
-- Category management for expenses
+- Category management for both expense and income categories, including per-category deletion
 - Data export, import, and workspace reset
-- Responsive landing page, auth screens, dashboard, and settings UI
+- Responsive landing page, auth screens, dashboard, savings flow, and settings UI
 - Custom app branding with logo and favicon
 
 ## Stack

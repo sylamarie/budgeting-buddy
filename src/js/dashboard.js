@@ -1,3 +1,5 @@
+let balanceSourceBreakdown = [];
+
 document.addEventListener('DOMContentLoaded', async function() {
     if (window.auth?.ready) {
         await window.auth.ready;
@@ -8,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     dataManager.init();
+    setupBudgetBalanceModal();
     await loadDashboardData();
 });
 
@@ -24,6 +27,8 @@ async function loadDashboardData() {
     createExpensesChart(expenses);
     createMonthlyOverviewChart(income, expenses, savings);
     updateFinalSummary(stats);
+    balanceSourceBreakdown = buildBalanceSourceBreakdown(income, expenses, savings);
+    renderBudgetBalanceBreakdown(balanceSourceBreakdown);
 }
 
 function updateHeaderStats(stats) {
@@ -51,6 +56,88 @@ function updateFinalSummary(stats) {
 
     const netBalanceElement = document.getElementById('net-balance');
     netBalanceElement.className = stats.monthlySpendableBalance >= 0 ? 'text-2xl font-bold text-green-600' : 'text-2xl font-bold text-red-600';
+}
+
+function buildBalanceSourceBreakdown(income, expenses, savings) {
+    const sourceMap = new Map();
+    const ensureSource = (source) => {
+        const normalizedSource = String(source || 'Unassigned').trim() || 'Unassigned';
+        if (!sourceMap.has(normalizedSource)) {
+            sourceMap.set(normalizedSource, {
+                source: normalizedSource,
+                income: 0,
+                used: 0,
+                remaining: 0
+            });
+        }
+
+        return sourceMap.get(normalizedSource);
+    };
+
+    income.forEach((entry) => {
+        const source = ensureSource(entry.category || 'Unassigned');
+        source.income += Number(entry.amount) || 0;
+    });
+
+    expenses.forEach((entry) => {
+        const source = ensureSource(entry.fundingCategory || 'Unassigned');
+        source.used += Number(entry.amount) || 0;
+    });
+
+    savings.forEach((goal) => {
+        (goal.contributions || []).forEach((entry) => {
+            const source = ensureSource(entry.fundingCategory || 'Unassigned');
+            source.used += Number(entry.amount) || 0;
+        });
+    });
+
+    return [...sourceMap.values()]
+        .map((entry) => ({
+            ...entry,
+            remaining: entry.income - entry.used
+        }))
+        .filter((entry) => entry.income !== 0 || entry.used !== 0)
+        .sort((a, b) => b.remaining - a.remaining);
+}
+
+function renderBudgetBalanceBreakdown(breakdown) {
+    const container = document.getElementById('budget-balance-breakdown');
+    if (!container) return;
+
+    if (!breakdown.length) {
+        container.innerHTML = '<p class="text-sm text-slate-500">No money source data yet.</p>';
+        return;
+    }
+
+    container.innerHTML = breakdown.map((entry) => `
+        <div class="flex items-center justify-between gap-4 rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div>
+                <p class="font-semibold text-slate-900">${entry.source}</p>
+                <p class="text-xs text-slate-500">Income ${getCurrencySymbol()}${formatAmount(entry.income)} | Used ${getCurrencySymbol()}${formatAmount(entry.used)}</p>
+            </div>
+            <p class="${entry.remaining >= 0 ? 'text-emerald-700' : 'text-rose-600'} font-bold">
+                ${getCurrencySymbol()}${formatAmount(entry.remaining)}
+            </p>
+        </div>
+    `).join('');
+}
+
+function setupBudgetBalanceModal() {
+    const balanceCard = document.getElementById('budget-balance-card');
+    const modal = document.getElementById('budget-balance-modal');
+    const closeBtn = document.getElementById('close-budget-balance-modal');
+
+    if (balanceCard && modal) {
+        balanceCard.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+        });
+    }
+
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    }
 }
 
 function createExpensesChart(expenses) {
