@@ -83,6 +83,7 @@ function displayRecentExpenses(expenses) {
             <div>
                 <p class="font-semibold text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                 <p class="text-sm text-gray-600">${expense.category} | ${new Date(expense.date).toLocaleDateString()}</p>
+                ${expense.note || expense.description ? `<p class="text-sm text-slate-700"><span class="font-medium text-slate-900">Note:</span> ${escapeHtml(expense.note || expense.description)}</p>` : ''}
                 <p class="text-xs text-slate-500">Paid from: ${expense.fundingCategory || 'Not set'}</p>
                 <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
             </div>
@@ -115,6 +116,7 @@ function displayAllExpenses(expenses) {
                     <div>
                         <p class="font-medium text-gray-900">${getCurrencySymbol()}${formatAmount(expense.amount)}</p>
                         <p class="text-sm text-gray-600">${expense.category}</p>
+                        ${expense.note || expense.description ? `<p class="text-sm text-slate-700"><span class="font-medium text-slate-900">Note:</span> ${escapeHtml(expense.note || expense.description)}</p>` : ''}
                         <p class="text-xs text-slate-500">Paid from: ${expense.fundingCategory || 'Not set'}</p>
                         <p class="text-xs text-slate-500">Budget month: ${dataManager.formatBudgetMonthLabel(dataManager.getExpenseBudgetMonth(expense))}</p>
                     </div>
@@ -149,6 +151,7 @@ async function addExpense() {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
+    const note = document.getElementById('expense-note').value.trim();
     const budgetMonth = document.getElementById('budget-month').value;
     const fundingCategory = document.getElementById('funding-category').value;
 
@@ -164,7 +167,7 @@ async function addExpense() {
     }
 
     try {
-        await dataManager.addExpense(amount, category, date, budgetMonth, fundingCategory);
+        await dataManager.addExpense(amount, category, date, budgetMonth, fundingCategory, note);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         currentEditingExpenseId = null;
@@ -204,6 +207,7 @@ async function editExpense(id) {
     document.getElementById('amount').value = expense.amount;
     document.getElementById('category').value = expense.category;
     document.getElementById('date').value = expense.date;
+    document.getElementById('expense-note').value = expense.note || expense.description || '';
     document.getElementById('budget-month').value = dataManager.getExpenseBudgetMonth(expense);
     document.getElementById('funding-category').value = expense.fundingCategory || '';
     updateFundingCategoryHelper();
@@ -222,6 +226,7 @@ async function updateExpense(id) {
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
     const date = document.getElementById('date').value;
+    const note = document.getElementById('expense-note').value.trim();
     const budgetMonth = document.getElementById('budget-month').value;
     const fundingCategory = document.getElementById('funding-category').value;
 
@@ -237,7 +242,7 @@ async function updateExpense(id) {
     }
 
     try {
-        await dataManager.updateExpense(id, amount, category, date, budgetMonth, fundingCategory);
+        await dataManager.updateExpense(id, amount, category, date, budgetMonth, fundingCategory, note);
         document.getElementById('expense-form').reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
         currentEditingExpenseId = null;
@@ -469,6 +474,16 @@ function getFundingCategoryRemaining(category) {
 
 function formatAmount(amount) {
     return Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escapeHtml(value) {
+    const text = String(value || '');
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 window.addEventListener('currencyChanged', () => {

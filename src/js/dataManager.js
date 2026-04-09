@@ -100,7 +100,7 @@ class DataManager {
             case 'income':
                 return `Amount: ${amount(item.amount)}\nCategory: ${item.category}\nDate: ${new Date(item.date).toLocaleDateString()}`;
             case 'expenses':
-                return `Amount: ${amount(item.amount)}\nCategory: ${item.category}\nPaid from: ${item.fundingCategory || 'Not set'}\nDate: ${new Date(item.date).toLocaleDateString()}`;
+                return `Amount: ${amount(item.amount)}\nCategory: ${item.category}\nPaid from: ${item.fundingCategory || 'Not set'}\nComment: ${item.note || item.description || 'None'}\nDate: ${new Date(item.date).toLocaleDateString()}`;
             case 'savings':
                 return `Goal: ${item.goalName}\nTarget: ${amount(item.targetAmount)}\nSaved: ${amount(item.savedAmount)}`;
             case 'settings':
@@ -141,13 +141,14 @@ class DataManager {
         return this.getData('expenses');
     }
 
-    async addExpense(amount, category, date, budgetMonth = null, fundingCategory = '') {
+    async addExpense(amount, category, date, budgetMonth = null, fundingCategory = '', note = '') {
         return this.addItem('expenses', {
             amount,
             category,
             date,
             budgetMonth: budgetMonth || this.getBudgetMonthKey(date),
-            fundingCategory
+            fundingCategory,
+            note
         });
     }
 
@@ -210,13 +211,14 @@ class DataManager {
         };
     }
 
-    async updateExpense(id, amount, category, date, budgetMonth = null, fundingCategory = '') {
+    async updateExpense(id, amount, category, date, budgetMonth = null, fundingCategory = '', note = '') {
         return this.updateItem('expenses', id, {
             amount,
             category,
             date,
             budgetMonth: budgetMonth || this.getBudgetMonthKey(date),
-            fundingCategory
+            fundingCategory,
+            note
         });
     }
 
